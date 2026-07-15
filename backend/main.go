@@ -1,19 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"log"
 	"net/http"
+
+	"plp-planner/bootstrap"
+	"plp-planner/database"
 )
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Servidor Ativo")
-}
-
 func main() {
-	mux := http.NewServeMux()
-	
-	mux.HandleFunc("GET /", hello)
+	ctx := context.Background()
 
-	println("Servidor rodando em http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	db, err := database.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	if err := database.RunMigrations(ctx); err != nil {
+		log.Fatal(err)
+	}
+
+	dependencies := bootstrap.InitializeDependencies(db)
+	router := bootstrap.InitializeRouter(dependencies)
+
+	log.Println("Servidor rodando em http://localhost:8080")
+
+	if err := http.ListenAndServe(":8080", router); err != nil {
+		log.Fatal(err)
+	}
 }
