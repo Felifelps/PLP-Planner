@@ -1,8 +1,16 @@
 # PLP-Planner
 
-Aplicação composta por um frontend em Angular, um backend em Go e um banco de dados PostgreSQL.
+O PLP-Planner é um planner desenvolvido para a disciplina de PLP.
+
+A aplicação é composta por um frontend em Angular, um backend em Go e um banco de dados PostgreSQL.
 
 Todo o ambiente é executado com Docker. Não é necessário instalar Go, Node.js, Angular CLI ou PostgreSQL diretamente na máquina.
+
+## Documentação do backend
+
+As orientações para adicionar models, repositories, services, handlers, rotas e migrations estão disponíveis no README do backend:
+
+[Acessar o padrão de desenvolvimento do backend](backend/README.md)
 
 ## Requisitos
 
