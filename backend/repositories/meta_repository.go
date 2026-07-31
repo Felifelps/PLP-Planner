@@ -2,10 +2,7 @@ package repositories
 
 import (
 	"context"
-
 	"fmt"
-
-	"time"
 
 	"plp-planner/models"
 
@@ -16,7 +13,10 @@ type MetaRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewMetaRepository(db *pgxpool.Pool) *MetaRepository {
+func NewMetaRepository(
+	db *pgxpool.Pool,
+) *MetaRepository {
+
 	return &MetaRepository{
 		db: db,
 	}
@@ -36,7 +36,14 @@ func (r *MetaRepository) Salvar(
 			data_inicio,
 			data_fim
 		)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES (
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6
+		)
 		RETURNING id;
 	`
 
@@ -49,7 +56,9 @@ func (r *MetaRepository) Salvar(
 		meta.Status,
 		meta.DataInicio,
 		meta.DataFim,
-	).Scan(&meta.ID)
+	).Scan(
+		&meta.ID,
+	)
 }
 
 func (r *MetaRepository) BuscarTodos(
@@ -73,18 +82,23 @@ func (r *MetaRepository) BuscarTodos(
 		ctx,
 		query,
 	)
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
-	metas := make([]models.Meta, 0)
+	metas := make(
+		[]models.Meta,
+		0,
+	)
 
 	for rows.Next() {
 
 		var meta models.Meta
 
-		if err := rows.Scan(
+		err := rows.Scan(
 			&meta.ID,
 			&meta.Nome,
 			&meta.Descricao,
@@ -92,7 +106,9 @@ func (r *MetaRepository) BuscarTodos(
 			&meta.Status,
 			&meta.DataInicio,
 			&meta.DataFim,
-		); err != nil {
+		)
+
+		if err != nil {
 			return nil, err
 		}
 
@@ -146,289 +162,6 @@ func (r *MetaRepository) BuscarPorID(
 	return &meta, nil
 }
 
-func (r *MetaRepository) BuscarPorNome(
-	ctx context.Context,
-	nome string,
-) ([]models.Meta, error) {
-
-	query := `
-		SELECT
-			id,
-			nome,
-			descricao,
-			categoria_id,
-			status,
-			data_inicio,
-			data_fim
-		FROM metas
-		WHERE nome ILIKE '%' || $1 || '%'
-		ORDER BY nome;
-	`
-
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		nome,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	metas := make([]models.Meta, 0)
-
-	for rows.Next() {
-
-		var meta models.Meta
-
-		if err := rows.Scan(
-			&meta.ID,
-			&meta.Nome,
-			&meta.Descricao,
-			&meta.CategoriaID,
-			&meta.Status,
-			&meta.DataInicio,
-			&meta.DataFim,
-		); err != nil {
-			return nil, err
-		}
-
-		metas = append(
-			metas,
-			meta,
-		)
-	}
-
-	return metas, rows.Err()
-}
-
-func (r *MetaRepository) BuscarPorCategoria(
-	ctx context.Context,
-	categoriaID int64,
-) ([]models.Meta, error) {
-
-	query := `
-		SELECT
-			id,
-			nome,
-			descricao,
-			categoria_id,
-			status,
-			data_inicio,
-			data_fim
-		FROM metas
-		WHERE categoria_id = $1
-		ORDER BY nome;
-	`
-
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		categoriaID,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	metas := make([]models.Meta, 0)
-
-	for rows.Next() {
-
-		var meta models.Meta
-
-		if err := rows.Scan(
-			&meta.ID,
-			&meta.Nome,
-			&meta.Descricao,
-			&meta.CategoriaID,
-			&meta.Status,
-			&meta.DataInicio,
-			&meta.DataFim,
-		); err != nil {
-			return nil, err
-		}
-
-		metas = append(
-			metas,
-			meta,
-		)
-	}
-
-	return metas, rows.Err()
-}
-
-func (r *MetaRepository) BuscarPorStatus(
-	ctx context.Context,
-	status string,
-) ([]models.Meta, error) {
-
-	query := `
-		SELECT
-			id,
-			nome,
-			descricao,
-			categoria_id,
-			status,
-			data_inicio,
-			data_fim
-		FROM metas
-		WHERE status = $1
-		ORDER BY data_fim;
-	`
-
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		status,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	metas := make([]models.Meta, 0)
-
-	for rows.Next() {
-
-		var meta models.Meta
-
-		if err := rows.Scan(
-			&meta.ID,
-			&meta.Nome,
-			&meta.Descricao,
-			&meta.CategoriaID,
-			&meta.Status,
-			&meta.DataInicio,
-			&meta.DataFim,
-		); err != nil {
-			return nil, err
-		}
-
-		metas = append(
-			metas,
-			meta,
-		)
-	}
-
-	return metas, rows.Err()
-}
-
-func (r *MetaRepository) BuscarPorPeriodo(
-	ctx context.Context,
-	dataInicio time.Time,
-	dataFim time.Time,
-) ([]models.Meta, error) {
-
-	query := `
-		SELECT
-			id,
-			nome,
-			descricao,
-			categoria_id,
-			status,
-			data_inicio,
-			data_fim
-		FROM metas
-		WHERE data_inicio >= $1
-		  AND data_fim <= $2
-		ORDER BY data_inicio;
-	`
-
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		dataInicio,
-		dataFim,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	metas := make([]models.Meta, 0)
-
-	for rows.Next() {
-
-		var meta models.Meta
-
-		if err := rows.Scan(
-			&meta.ID,
-			&meta.Nome,
-			&meta.Descricao,
-			&meta.CategoriaID,
-			&meta.Status,
-			&meta.DataInicio,
-			&meta.DataFim,
-		); err != nil {
-			return nil, err
-		}
-
-		metas = append(
-			metas,
-			meta,
-		)
-	}
-
-	return metas, rows.Err()
-}
-
-func (r *MetaRepository) BuscarRecentes(
-	ctx context.Context,
-	limite int,
-) ([]models.Meta, error) {
-
-	query := `
-		SELECT
-			id,
-			nome,
-			descricao,
-			categoria_id,
-			status,
-			data_inicio,
-			data_fim
-		FROM metas
-		ORDER BY id DESC
-		LIMIT $1;
-	`
-
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		limite,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	metas := make([]models.Meta, 0)
-
-	for rows.Next() {
-
-		var meta models.Meta
-
-		if err := rows.Scan(
-			&meta.ID,
-			&meta.Nome,
-			&meta.Descricao,
-			&meta.CategoriaID,
-			&meta.Status,
-			&meta.DataInicio,
-			&meta.DataFim,
-		); err != nil {
-			return nil, err
-		}
-
-		metas = append(
-			metas,
-			meta,
-		)
-	}
-
-	return metas, rows.Err()
-}
-
 func (r *MetaRepository) Atualizar(
 	ctx context.Context,
 	meta *models.Meta,
@@ -463,7 +196,10 @@ func (r *MetaRepository) Atualizar(
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("meta com id %d não encontrada", meta.ID)
+		return fmt.Errorf(
+			"meta %d não encontrada",
+			meta.ID,
+		)
 	}
 
 	return nil
@@ -493,9 +229,11 @@ func (r *MetaRepository) AtualizarStatus(
 		return err
 	}
 
-	// Verifica se a linha realmente existia
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("meta com id %d não encontrada", id)
+		return fmt.Errorf(
+			"meta %d não encontrada",
+			id,
+		)
 	}
 
 	return nil
@@ -522,7 +260,10 @@ func (r *MetaRepository) Excluir(
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("meta com id %d não encontrada", id)
+		return fmt.Errorf(
+			"meta %d não encontrada",
+			id,
+		)
 	}
 
 	return nil

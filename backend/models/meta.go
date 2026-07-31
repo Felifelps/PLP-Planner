@@ -17,3 +17,19 @@ type Meta struct {
 	DataInicio  time.Time `json:"data_inicio"`
 	DataFim     time.Time `json:"data_fim"`
 }
+
+func StatusValido(status string) bool {
+	switch status {
+	case StatusCumprida,
+		StatusParcialmenteCumprida,
+		StatusNaoCumprida:
+		return true
+
+	default:
+		return false
+	}
+}
+
+func (m *Meta) PeriodoValido() bool {
+	return !m.DataInicio.After(m.DataFim)
+}
