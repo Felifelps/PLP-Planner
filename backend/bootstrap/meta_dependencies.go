@@ -11,26 +11,17 @@ import (
 func initializeMetaRepository(
 	db *pgxpool.Pool,
 ) *repositories.MetaRepository {
-
-	return repositories.NewMetaRepository(
-		db,
-	)
+	return repositories.NewMetaRepository(db)
 }
 
 func initializeMetaService(
 	repository *repositories.MetaRepository,
 ) *services.MetaService {
-
-	return services.NewMetaService(
-		repository,
-	)
+	return services.NewMetaService(repository)
 }
 
 func initializeMetaHandler(
 	service *services.MetaService,
 ) *handlers.MetaHandler {
-
-	return handlers.NewMetaHandler(
-		service,
-	)
+	return handlers.NewMetaHandler(service)
 }
