@@ -28,9 +28,14 @@ func (h *MetaHandler) BuscarTodos(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	query := r.URL.Query()
+	dataInicio := query.Get("data_inicio")
+	dataFim := query.Get("data_fim")
 
 	metas, err := h.service.BuscarTodos(
 		r.Context(),
+		dataInicio,
+		dataFim,
 	)
 
 	if err != nil {
@@ -57,7 +62,6 @@ func (h *MetaHandler) BuscarTodos(
 		w,
 	).Encode(metas)
 }
-
 func (h *MetaHandler) BuscarPorID(
 	w http.ResponseWriter,
 	r *http.Request,

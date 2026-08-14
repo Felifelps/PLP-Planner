@@ -63,6 +63,8 @@ func (r *MetaRepository) Salvar(
 
 func (r *MetaRepository) BuscarTodos(
 	ctx context.Context,
+	dataInicio string,
+	dataFim string,
 ) ([]models.Meta, error) {
 
 	query := `
@@ -75,12 +77,30 @@ func (r *MetaRepository) BuscarTodos(
 			data_inicio,
 			data_fim
 		FROM metas
-		ORDER BY id;
+		WHERE 1=1
 	`
+
+	var args []interface{}
+	argCount := 1
+
+	if dataInicio != "" {
+		query += fmt.Sprintf(" AND data_fim >= $%d", argCount)
+		args = append(args, dataInicio)
+		argCount++
+	}
+
+	if dataFim != "" {
+		query += fmt.Sprintf(" AND data_inicio <= $%d", argCount)
+		args = append(args, dataFim)
+		argCount++
+	}
+
+	query += " ORDER BY id;"
 
 	rows, err := r.db.Query(
 		ctx,
 		query,
+		args...,
 	)
 
 	if err != nil {

@@ -25,6 +25,8 @@ type MetaRepository interface {
 
 	BuscarTodos(
 		ctx context.Context,
+		dataInicio string,
+		dataFim string,
 	) ([]models.Meta, error)
 
 	BuscarPorID(
@@ -108,10 +110,14 @@ func (s *MetaService) Salvar(
 
 func (s *MetaService) BuscarTodos(
 	ctx context.Context,
+	dataInicio string,
+	dataFim string,
 ) ([]models.Meta, error) {
 
 	return s.repository.BuscarTodos(
 		ctx,
+		dataInicio,
+		dataFim,
 	)
 }
 
