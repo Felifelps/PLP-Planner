@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"plp-planner/models"
+	"plp-planner/repositories"
 	"plp-planner/services"
 )
 
@@ -18,7 +20,6 @@ type MetaHandler struct {
 func NewMetaHandler(
 	service *services.MetaService,
 ) *MetaHandler {
-
 	return &MetaHandler{
 		service: service,
 	}
@@ -29,6 +30,7 @@ func (h *MetaHandler) BuscarTodos(
 	r *http.Request,
 ) {
 	query := r.URL.Query()
+
 	dataInicio := query.Get("data_inicio")
 	dataFim := query.Get("data_fim")
 
@@ -58,18 +60,21 @@ func (h *MetaHandler) BuscarTodos(
 		"application/json",
 	)
 
-	json.NewEncoder(
-		w,
-	).Encode(metas)
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(metas); err != nil {
+		log.Printf(
+			"erro ao serializar metas: %v",
+			err,
+		)
+	}
 }
+
 func (h *MetaHandler) BuscarPorID(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-
-	id, err := obterID(
-		r.URL.Path,
-	)
+	id, err := obterID(r.URL.Path)
 
 	if err != nil {
 		http.Error(
@@ -87,6 +92,16 @@ func (h *MetaHandler) BuscarPorID(
 	)
 
 	if err != nil {
+		if errors.Is(err, repositories.ErrMetaNaoEncontrada) {
+			http.Error(
+				w,
+				"meta não encontrada",
+				http.StatusNotFound,
+			)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao buscar meta: %v",
 			err,
@@ -106,23 +121,25 @@ func (h *MetaHandler) BuscarPorID(
 		"application/json",
 	)
 
-	json.NewEncoder(
-		w,
-	).Encode(meta)
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(meta); err != nil {
+		log.Printf(
+			"erro ao serializar meta: %v",
+			err,
+		)
+	}
 }
 
 func (h *MetaHandler) Criar(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-
 	var meta models.Meta
 
 	err := json.NewDecoder(
 		r.Body,
-	).Decode(
-		&meta,
-	)
+	).Decode(&meta)
 
 	if err != nil {
 		http.Error(
@@ -154,23 +171,26 @@ func (h *MetaHandler) Criar(
 		return
 	}
 
-	w.WriteHeader(
-		http.StatusCreated,
+	w.Header().Set(
+		"Content-Type",
+		"application/json",
 	)
 
-	json.NewEncoder(
-		w,
-	).Encode(meta)
+	w.WriteHeader(http.StatusCreated)
+
+	if err := json.NewEncoder(w).Encode(meta); err != nil {
+		log.Printf(
+			"erro ao serializar meta criada: %v",
+			err,
+		)
+	}
 }
 
 func (h *MetaHandler) Atualizar(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-
-	id, err := obterID(
-		r.URL.Path,
-	)
+	id, err := obterID(r.URL.Path)
 
 	if err != nil {
 		http.Error(
@@ -186,9 +206,7 @@ func (h *MetaHandler) Atualizar(
 
 	err = json.NewDecoder(
 		r.Body,
-	).Decode(
-		&meta,
-	)
+	).Decode(&meta)
 
 	if err != nil {
 		http.Error(
@@ -208,6 +226,16 @@ func (h *MetaHandler) Atualizar(
 	)
 
 	if err != nil {
+		if errors.Is(err, repositories.ErrMetaNaoEncontrada) {
+			http.Error(
+				w,
+				"meta não encontrada",
+				http.StatusNotFound,
+			)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao atualizar meta: %v",
 			err,
@@ -227,19 +255,21 @@ func (h *MetaHandler) Atualizar(
 		"application/json",
 	)
 
-	json.NewEncoder(
-		w,
-	).Encode(meta)
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(meta); err != nil {
+		log.Printf(
+			"erro ao serializar meta atualizada: %v",
+			err,
+		)
+	}
 }
 
 func (h *MetaHandler) AtualizarStatus(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-
-	id, err := obterID(
-		r.URL.Path,
-	)
+	id, err := obterIDStatus(r.URL.Path)
 
 	if err != nil {
 		http.Error(
@@ -252,14 +282,12 @@ func (h *MetaHandler) AtualizarStatus(
 	}
 
 	var request struct {
-		Status string `json:"status"`
+		Status models.Status `json:"status"`
 	}
 
 	err = json.NewDecoder(
 		r.Body,
-	).Decode(
-		&request,
-	)
+	).Decode(&request)
 
 	if err != nil {
 		http.Error(
@@ -278,6 +306,16 @@ func (h *MetaHandler) AtualizarStatus(
 	)
 
 	if err != nil {
+		if errors.Is(err, repositories.ErrMetaNaoEncontrada) {
+			http.Error(
+				w,
+				"meta não encontrada",
+				http.StatusNotFound,
+			)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao atualizar status: %v",
 			err,
@@ -292,19 +330,14 @@ func (h *MetaHandler) AtualizarStatus(
 		return
 	}
 
-	w.WriteHeader(
-		http.StatusNoContent,
-	)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *MetaHandler) Excluir(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-
-	id, err := obterID(
-		r.URL.Path,
-	)
+	id, err := obterID(r.URL.Path)
 
 	if err != nil {
 		http.Error(
@@ -322,6 +355,16 @@ func (h *MetaHandler) Excluir(
 	)
 
 	if err != nil {
+		if errors.Is(err, repositories.ErrMetaNaoEncontrada) {
+			http.Error(
+				w,
+				"meta não encontrada",
+				http.StatusNotFound,
+			)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao excluir meta: %v",
 			err,
@@ -330,30 +373,49 @@ func (h *MetaHandler) Excluir(
 		http.Error(
 			w,
 			err.Error(),
-			http.StatusBadRequest,
+			http.StatusInternalServerError,
 		)
 
 		return
 	}
 
-	w.WriteHeader(
-		http.StatusNoContent,
-	)
+	w.WriteHeader(http.StatusNoContent)
 }
 
-func obterID(
-	path string,
-) (int64, error) {
-
+func obterID(path string) (int64, error) {
 	partes := strings.Split(
-		strings.Trim(
-			path,
-			"/",
-		),
+		strings.Trim(path, "/"),
 		"/",
 	)
 
+	if len(partes) == 0 || partes[len(partes)-1] == "" {
+		return 0, errors.New("id inválido")
+	}
+
 	id := partes[len(partes)-1]
+
+	return strconv.ParseInt(
+		id,
+		10,
+		64,
+	)
+}
+
+func obterIDStatus(path string) (int64, error) {
+	partes := strings.Split(
+		strings.Trim(path, "/"),
+		"/",
+	)
+
+	if len(partes) < 3 {
+		return 0, errors.New("id inválido")
+	}
+
+	if partes[len(partes)-1] != "status" {
+		return 0, errors.New("id inválido")
+	}
+
+	id := partes[len(partes)-2]
 
 	return strconv.ParseInt(
 		id,

@@ -2,21 +2,22 @@ package repositories
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"strconv"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"plp-planner/models"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var ErrMetaNaoEncontrada = errors.New("meta não encontrada")
 
 type MetaRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewMetaRepository(
-	db *pgxpool.Pool,
-) *MetaRepository {
-
+func NewMetaRepository(db *pgxpool.Pool) *MetaRepository {
 	return &MetaRepository{
 		db: db,
 	}
@@ -33,18 +34,12 @@ func (r *MetaRepository) Salvar(
 			descricao,
 			categoria_id,
 			status,
+			periodo,
 			data_inicio,
 			data_fim
 		)
-		VALUES (
-			$1,
-			$2,
-			$3,
-			$4,
-			$5,
-			$6
-		)
-		RETURNING id;
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id
 	`
 
 	return r.db.QueryRow(
@@ -54,11 +49,10 @@ func (r *MetaRepository) Salvar(
 		meta.Descricao,
 		meta.CategoriaID,
 		meta.Status,
+		meta.Periodo,
 		meta.DataInicio,
 		meta.DataFim,
-	).Scan(
-		&meta.ID,
-	)
+	).Scan(&meta.ID)
 }
 
 func (r *MetaRepository) BuscarTodos(
@@ -74,48 +68,44 @@ func (r *MetaRepository) BuscarTodos(
 			descricao,
 			categoria_id,
 			status,
+			periodo,
 			data_inicio,
 			data_fim
 		FROM metas
-		WHERE 1=1
 	`
 
-	var args []interface{}
-	argCount := 1
+	args := []interface{}{}
+	filtros := ""
 
 	if dataInicio != "" {
-		query += fmt.Sprintf(" AND data_fim >= $%d", argCount)
 		args = append(args, dataInicio)
-		argCount++
+		filtros += "data_inicio >= $" + strconv.Itoa(len(args))
 	}
 
 	if dataFim != "" {
-		query += fmt.Sprintf(" AND data_inicio <= $%d", argCount)
+		if filtros != "" {
+			filtros += " AND "
+		}
+
 		args = append(args, dataFim)
-		argCount++
+		filtros += "data_fim <= $" + strconv.Itoa(len(args))
 	}
 
-	query += " ORDER BY id;"
+	if filtros != "" {
+		query += " WHERE " + filtros
+	}
 
-	rows, err := r.db.Query(
-		ctx,
-		query,
-		args...,
-	)
+	query += " ORDER BY id"
 
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
-	metas := make(
-		[]models.Meta,
-		0,
-	)
+	metas := make([]models.Meta, 0)
 
 	for rows.Next() {
-
 		var meta models.Meta
 
 		err := rows.Scan(
@@ -124,6 +114,7 @@ func (r *MetaRepository) BuscarTodos(
 			&meta.Descricao,
 			&meta.CategoriaID,
 			&meta.Status,
+			&meta.Periodo,
 			&meta.DataInicio,
 			&meta.DataFim,
 		)
@@ -132,13 +123,14 @@ func (r *MetaRepository) BuscarTodos(
 			return nil, err
 		}
 
-		metas = append(
-			metas,
-			meta,
-		)
+		metas = append(metas, meta)
 	}
 
-	return metas, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return metas, nil
 }
 
 func (r *MetaRepository) BuscarPorID(
@@ -153,10 +145,11 @@ func (r *MetaRepository) BuscarPorID(
 			descricao,
 			categoria_id,
 			status,
+			periodo,
 			data_inicio,
 			data_fim
 		FROM metas
-		WHERE id = $1;
+		WHERE id = $1
 	`
 
 	var meta models.Meta
@@ -171,9 +164,14 @@ func (r *MetaRepository) BuscarPorID(
 		&meta.Descricao,
 		&meta.CategoriaID,
 		&meta.Status,
+		&meta.Periodo,
 		&meta.DataInicio,
 		&meta.DataFim,
 	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrMetaNaoEncontrada
+	}
 
 	if err != nil {
 		return nil, err
@@ -194,9 +192,10 @@ func (r *MetaRepository) Atualizar(
 			descricao = $2,
 			categoria_id = $3,
 			status = $4,
-			data_inicio = $5,
-			data_fim = $6
-		WHERE id = $7;
+			periodo = $5,
+			data_inicio = $6,
+			data_fim = $7
+		WHERE id = $8
 	`
 
 	result, err := r.db.Exec(
@@ -206,6 +205,7 @@ func (r *MetaRepository) Atualizar(
 		meta.Descricao,
 		meta.CategoriaID,
 		meta.Status,
+		meta.Periodo,
 		meta.DataInicio,
 		meta.DataFim,
 		meta.ID,
@@ -216,10 +216,7 @@ func (r *MetaRepository) Atualizar(
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf(
-			"meta %d não encontrada",
-			meta.ID,
-		)
+		return ErrMetaNaoEncontrada
 	}
 
 	return nil
@@ -228,14 +225,13 @@ func (r *MetaRepository) Atualizar(
 func (r *MetaRepository) AtualizarStatus(
 	ctx context.Context,
 	id int64,
-	status string,
+	status models.Status,
 ) error {
 
 	query := `
 		UPDATE metas
-		SET
-			status = $1
-		WHERE id = $2;
+		SET status = $1
+		WHERE id = $2
 	`
 
 	result, err := r.db.Exec(
@@ -250,10 +246,7 @@ func (r *MetaRepository) AtualizarStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf(
-			"meta %d não encontrada",
-			id,
-		)
+		return ErrMetaNaoEncontrada
 	}
 
 	return nil
@@ -266,7 +259,7 @@ func (r *MetaRepository) Excluir(
 
 	query := `
 		DELETE FROM metas
-		WHERE id = $1;
+		WHERE id = $1
 	`
 
 	result, err := r.db.Exec(
@@ -280,10 +273,7 @@ func (r *MetaRepository) Excluir(
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf(
-			"meta %d não encontrada",
-			id,
-		)
+		return ErrMetaNaoEncontrada
 	}
 
 	return nil

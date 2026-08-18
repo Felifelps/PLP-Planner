@@ -14,7 +14,6 @@ var (
 	ErrNomeObrigatorio   = errors.New("nome obrigatório")
 	ErrCategoriaInvalida = errors.New("categoria inválida")
 	ErrStatusInvalido    = errors.New("status inválido")
-	ErrPeriodoInvalido   = errors.New("período inválido")
 )
 
 type MetaRepository interface {
@@ -42,7 +41,7 @@ type MetaRepository interface {
 	AtualizarStatus(
 		ctx context.Context,
 		id int64,
-		status string,
+		status models.Status,
 	) error
 
 	Excluir(
@@ -58,7 +57,6 @@ type MetaService struct {
 func NewMetaService(
 	repository MetaRepository,
 ) *MetaService {
-
 	return &MetaService{
 		repository: repository,
 	}
@@ -80,14 +78,8 @@ func (s *MetaService) validarMeta(
 		return ErrCategoriaInvalida
 	}
 
-	if !models.StatusValido(
-		meta.Status,
-	) {
-		return ErrStatusInvalido
-	}
-
-	if !meta.PeriodoValido() {
-		return ErrPeriodoInvalido
+	if err := meta.Validate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -162,16 +154,14 @@ func (s *MetaService) Atualizar(
 func (s *MetaService) AtualizarStatus(
 	ctx context.Context,
 	id int64,
-	status string,
+	status models.Status,
 ) error {
 
 	if id <= 0 {
 		return ErrIDInvalido
 	}
 
-	if !models.StatusValido(
-		status,
-	) {
+	if !models.StatusValido(status) {
 		return ErrStatusInvalido
 	}
 
