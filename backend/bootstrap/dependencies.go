@@ -10,14 +10,17 @@ import (
 
 type Repositories struct {
 	Exemplo *repositories.ExemploRepository
+	Meta    *repositories.MetaRepository
 }
 
 type Services struct {
 	Exemplo *services.ExemploService
+	Meta    *services.MetaService
 }
 
 type Handlers struct {
 	Exemplo *handlers.ExemploHandler
+	Meta    *handlers.MetaHandler
 }
 
 type Dependencies struct {
@@ -45,6 +48,8 @@ func initializeRepositories(
 ) *Repositories {
 	return &Repositories{
 		Exemplo: repositories.NewExemploRepository(db),
+
+		Meta: initializeMetaRepository(db),
 	}
 }
 
@@ -55,6 +60,8 @@ func initializeServices(
 		Exemplo: services.NewExemploService(
 			appRepositories.Exemplo,
 		),
+
+		Meta: initializeMetaService(appRepositories.Meta),
 	}
 }
 
@@ -65,5 +72,7 @@ func initializeHandlers(
 		Exemplo: handlers.NewExemploHandler(
 			appServices.Exemplo,
 		),
+
+		Meta: initializeMetaHandler(appServices.Meta),
 	}
 }
