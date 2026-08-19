@@ -9,18 +9,24 @@ import (
 )
 
 type Repositories struct {
-	Exemplo *repositories.ExemploRepository
-	Meta    *repositories.MetaRepository
+	Exemplo   *repositories.ExemploRepository
+	Meta      *repositories.MetaRepository
+	Categoria *repositories.CategoriaRepository
+	Tarefa    *repositories.TarefaRepository
 }
 
 type Services struct {
-	Exemplo *services.ExemploService
-	Meta    *services.MetaService
+	Exemplo   *services.ExemploService
+	Meta      *services.MetaService
+	Categoria *services.CategoriaService
+	Tarefa    *services.TarefaService
 }
 
 type Handlers struct {
-	Exemplo *handlers.ExemploHandler
-	Meta    *handlers.MetaHandler
+	Exemplo   *handlers.ExemploHandler
+	Meta      *handlers.MetaHandler
+	Categoria *handlers.CategoriaHandler
+	Tarefa    *handlers.TarefaHandler
 }
 
 type Dependencies struct {
@@ -50,6 +56,9 @@ func initializeRepositories(
 		Exemplo: repositories.NewExemploRepository(db),
 
 		Meta: initializeMetaRepository(db),
+
+		Categoria: initializeCategoriaRepository(db),
+		Tarefa:    initializeTarefaRepository(db),
 	}
 }
 
@@ -62,6 +71,9 @@ func initializeServices(
 		),
 
 		Meta: initializeMetaService(appRepositories.Meta),
+
+		Categoria: initializeCategoriaService(appRepositories.Categoria),
+		Tarefa:    initializeTarefaService(appRepositories.Tarefa),
 	}
 }
 
@@ -74,5 +86,8 @@ func initializeHandlers(
 		),
 
 		Meta: initializeMetaHandler(appServices.Meta),
+
+		Categoria: initializeCategoriaHandler(appServices.Categoria),
+		Tarefa:    initializeTarefaHandler(appServices.Tarefa),
 	}
 }
