@@ -62,8 +62,8 @@ func (r *LembreteRepository) BuscarTodos(
 			id,
 			descricao,
 			tipo,
-			data,
-			horario,
+			TO_CHAR(data, 'YYYY-MM-DD'),
+			TO_CHAR(horario, 'HH24:MI'),
 			recorrente
 		FROM lembretes
 	`
@@ -135,8 +135,8 @@ func (r *LembreteRepository) BuscarPorID(
 			id,
 			descricao,
 			tipo,
-			data,
-			horario,
+			TO_CHAR(data, 'YYYY-MM-DD'),
+			TO_CHAR(horario, 'HH24:MI'),
 			recorrente
 		FROM lembretes
 		WHERE id = $1
