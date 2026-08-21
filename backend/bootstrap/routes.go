@@ -14,6 +14,7 @@ func InitializeRouter(
 	initializeStatusRoutes(router)
 	initializeExemploRoutes(router, dependencies.Handlers)
 	initializeMetaRoutes(router, dependencies.Handlers)
+	initializeLembreteRoutes(router, dependencies.Handlers)
 
 	return router
 }
@@ -69,5 +70,35 @@ func initializeMetaRoutes(
 	router.HandleFunc(
 		"DELETE /metas/{id}",
 		appHandlers.Meta.Excluir,
+	)
+}
+
+func initializeLembreteRoutes(
+	router *http.ServeMux,
+	appHandlers *Handlers,
+) {
+	router.HandleFunc(
+		"GET /lembretes",
+		appHandlers.Lembrete.BuscarTodos,
+	)
+
+	router.HandleFunc(
+		"GET /lembretes/{id}",
+		appHandlers.Lembrete.BuscarPorID,
+	)
+
+	router.HandleFunc(
+		"POST /lembretes",
+		appHandlers.Lembrete.Criar,
+	)
+
+	router.HandleFunc(
+		"PUT /lembretes/{id}",
+		appHandlers.Lembrete.Atualizar,
+	)
+
+	router.HandleFunc(
+		"DELETE /lembretes/{id}",
+		appHandlers.Lembrete.Excluir,
 	)
 }

@@ -9,18 +9,21 @@ import (
 )
 
 type Repositories struct {
-	Exemplo *repositories.ExemploRepository
-	Meta    *repositories.MetaRepository
+	Exemplo   *repositories.ExemploRepository
+	Meta      *repositories.MetaRepository
+	Lembrete  *repositories.LembreteRepository
 }
 
 type Services struct {
-	Exemplo *services.ExemploService
-	Meta    *services.MetaService
+	Exemplo   *services.ExemploService
+	Meta      *services.MetaService
+	Lembrete  *services.LembreteService
 }
 
 type Handlers struct {
-	Exemplo *handlers.ExemploHandler
-	Meta    *handlers.MetaHandler
+	Exemplo   *handlers.ExemploHandler
+	Meta      *handlers.MetaHandler
+	Lembrete  *handlers.LembreteHandler
 }
 
 type Dependencies struct {
@@ -50,6 +53,8 @@ func initializeRepositories(
 		Exemplo: repositories.NewExemploRepository(db),
 
 		Meta: initializeMetaRepository(db),
+
+		Lembrete: initializeLembreteRepository(db),
 	}
 }
 
@@ -62,6 +67,10 @@ func initializeServices(
 		),
 
 		Meta: initializeMetaService(appRepositories.Meta),
+
+		Lembrete: initializeLembreteService(
+			appRepositories.Lembrete,
+		),
 	}
 }
 
@@ -74,5 +83,9 @@ func initializeHandlers(
 		),
 
 		Meta: initializeMetaHandler(appServices.Meta),
+
+		Lembrete: initializeLembreteHandler(
+			appServices.Lembrete,
+		),
 	}
 }
