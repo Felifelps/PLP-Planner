@@ -1,0 +1,87 @@
+<div class="pagina">
+  <header class="topo">
+    <h1>Metas</h1>
+    <a class="botao botao--primario" routerLink="/metas/nova">Nova meta</a>
+  </header>
+
+  <div class="filtros">
+    <div class="filtros__tipos">
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'semana'"
+        (click)="selecionarPeriodo('semana')"
+      >
+        Semana
+      </button>
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'mes'"
+        (click)="selecionarPeriodo('mes')"
+      >
+        Mês
+      </button>
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'ano'"
+        (click)="selecionarPeriodo('ano')"
+      >
+        Ano
+      </button>
+    </div>
+
+    <div class="filtros__navegacao">
+      <button type="button" class="botao-icone" (click)="navegar(-1)" aria-label="Período anterior">‹</button>
+      <span class="filtros__rotulo">{{ rotuloIntervalo() }}</span>
+      <button type="button" class="botao-icone" (click)="navegar(1)" aria-label="Próximo período">›</button>
+    </div>
+  </div>
+
+  @if (erro()) {
+    <p class="mensagem-erro">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="mensagem-carregando">Carregando metas...</p>
+  } @else {
+    <div class="lista-metas">
+      @for (meta of metasVisiveis(); track meta.id) {
+        <article class="meta-card" [style.border-left-color]="corDaCategoria(meta)">
+          <div class="meta-card__cabecalho">
+            <h2>{{ meta.nome }}</h2>
+            <span class="meta-card__categoria" [style.background]="corDaCategoria(meta)">
+              {{ nomeDaCategoria(meta) }}
+            </span>
+          </div>
+
+          @if (meta.descricao) {
+            <p class="meta-card__descricao">{{ meta.descricao }}</p>
+          }
+
+          <p class="meta-card__periodo">{{ meta.periodo }}</p>
+
+          <div class="meta-card__rodape">
+            <select
+              class="meta-card__status"
+              [value]="meta.status"
+              (change)="mudarStatus(meta, $any($event.target).value)"
+            >
+              @for (opcao of statusOpcoes; track opcao) {
+                <option [value]="opcao">{{ opcao }}</option>
+              }
+            </select>
+
+            <div class="meta-card__acoes">
+              <a class="botao botao--secundario" [routerLink]="['/metas', meta.id, 'editar']">Editar</a>
+              <button type="button" class="botao botao--perigo" (click)="excluir(meta)">Excluir</button>
+            </div>
+          </div>
+        </article>
+      } @empty {
+        <p class="mensagem-vazia">Nenhuma meta neste período.</p>
+      }
+    </div>
+  }
+</div>
