@@ -46,6 +46,104 @@
   @if (carregando()) {
     <p class="mensagem-carregando">Carregando metas...</p>
   } @else {
+    @switch (tipoPeriodo()) {
+      @case ('semana') {
+        <div class="calendario-semana">
+          @for (dia of diasSemana(); track dia.getTime()) {
+            <div class="dia-coluna" [class.dia-coluna--hoje]="ehHoje(dia)">
+              <div class="dia-coluna__cabecalho">
+                <span class="dia-coluna__nome">{{ diaSemanaAbrev(dia) }}</span>
+                <span class="dia-coluna__numero">{{ numeroDia(dia) }}</span>
+              </div>
+              <div class="dia-coluna__metas">
+                @for (meta of metasDoDia(dia); track meta.id) {
+                  <a
+                    class="chip-meta"
+                    [style.background]="corDaCategoria(meta)"
+                    [routerLink]="['/metas', meta.id, 'editar']"
+                  >
+                    {{ meta.nome }}
+                  </a>
+                } @empty {
+                  <span class="dia-coluna__vazio">—</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('mes') {
+        <div class="calendario-mes">
+          <div class="calendario-mes__cabecalho">
+            @for (nome of diasSemanaAbrev; track nome) {
+              <span>{{ nome }}</span>
+            }
+          </div>
+          @for (semana of gradeMes(); track $index) {
+            <div class="calendario-mes__semana">
+              @for (dia of semana; track dia.data.getTime()) {
+                <button
+                  type="button"
+                  class="dia-celula"
+                  [class.dia-celula--fora]="dia.foraDoMes"
+                  [class.dia-celula--hoje]="ehHoje(dia.data)"
+                  (click)="selecionarDia(dia.data)"
+                >
+                  <span class="dia-celula__numero">{{ numeroDia(dia.data) }}</span>
+                  <span class="dia-celula__chips">
+                    @for (meta of metasDoDia(dia.data).slice(0, 3); track meta.id) {
+                      <span class="dia-celula__chip" [style.background]="corDaCategoria(meta)">{{ meta.nome }}</span>
+                    }
+                    @if (metasDoDia(dia.data).length > 3) {
+                      <span class="dia-celula__mais">+{{ metasDoDia(dia.data).length - 3 }} mais</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @case ('ano') {
+        <div class="calendario-ano">
+          @for (mes of mesesAno(); track mes.data.getTime()) {
+            <button type="button" class="mini-mes" (click)="selecionarMes(mes.data)">
+              <h3 class="mini-mes__titulo">{{ mes.nome }}</h3>
+              <div class="mini-mes__cabecalho">
+                @for (nome of diasSemanaAbrev; track nome) {
+                  <span>{{ nome[0] }}</span>
+                }
+              </div>
+              @for (semana of mes.grade; track $index) {
+                <div class="mini-mes__semana">
+                  @for (dia of semana; track dia.data.getTime()) {
+                    <span
+                      class="mini-mes__dia"
+                      [class.mini-mes__dia--fora]="dia.foraDoMes"
+                      [class.mini-mes__dia--hoje]="ehHoje(dia.data)"
+                    >
+                      {{ numeroDia(dia.data) }}
+                      @if (!dia.foraDoMes && coresDoDia(dia.data).length > 0) {
+                        <span class="mini-mes__pontos">
+                          @for (cor of coresDoDia(dia.data); track cor) {
+                            <span class="mini-mes__ponto" [style.background]="cor"></span>
+                          }
+                        </span>
+                      }
+                    </span>
+                  }
+                </div>
+              }
+            </button>
+          }
+        </div>
+      }
+    }
+
+    <h2 class="secao-titulo">Metas do período</h2>
+
     <div class="lista-metas">
       @for (meta of metasVisiveis(); track meta.id) {
         <article class="meta-card" [style.border-left-color]="corDaCategoria(meta)">

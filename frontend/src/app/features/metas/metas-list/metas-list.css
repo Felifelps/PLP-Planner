@@ -1,5 +1,5 @@
 .pagina {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
@@ -174,4 +174,224 @@
 .meta-card__acoes {
   display: flex;
   gap: 0.5rem;
+}
+
+.secao-titulo {
+  margin: 2rem 0 1rem;
+  font-size: 1.1rem;
+  color: var(--cor-texto-suave);
+}
+
+.chip-meta {
+  display: block;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Visualização de semana: 7 colunas de dias */
+
+.calendario-semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.dia-coluna {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dia-coluna--hoje {
+  border-color: var(--cor-primaria);
+}
+
+.dia-coluna__cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.dia-coluna__nome {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+
+.dia-coluna__numero {
+  font-weight: 600;
+}
+
+.dia-coluna__metas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dia-coluna__vazio {
+  color: var(--cor-texto-suave);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* Visualização de mês: grade de semanas x dias */
+
+.calendario-mes {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.calendario-mes__cabecalho {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.calendario-mes__cabecalho span {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--cor-texto-suave);
+  text-transform: uppercase;
+}
+
+.calendario-mes__semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dia-celula {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.4rem;
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.dia-celula--fora {
+  opacity: 0.4;
+}
+
+.dia-celula--hoje {
+  border-color: var(--cor-primaria);
+}
+
+.dia-celula__numero {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.dia-celula__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dia-celula__chip {
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dia-celula__mais {
+  font-size: 0.7rem;
+  color: var(--cor-texto-suave);
+}
+
+/* Visualização de ano: 12 mini-calendários de mês */
+
+.calendario-ano {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.mini-mes {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.mini-mes:hover {
+  border-color: var(--cor-primaria);
+}
+
+.mini-mes__titulo {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  text-transform: capitalize;
+}
+
+.mini-mes__cabecalho,
+.mini-mes__semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.mini-mes__cabecalho span {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--cor-texto-suave);
+}
+
+.mini-mes__dia {
+  position: relative;
+  text-align: center;
+  font-size: 0.7rem;
+  padding: 0.15rem 0;
+  color: var(--cor-texto);
+}
+
+.mini-mes__dia--fora {
+  color: var(--cor-texto-suave);
+  opacity: 0.4;
+}
+
+.mini-mes__dia--hoje {
+  font-weight: 700;
+  color: var(--cor-primaria);
+}
+
+.mini-mes__pontos {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+}
+
+.mini-mes__ponto {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
 }

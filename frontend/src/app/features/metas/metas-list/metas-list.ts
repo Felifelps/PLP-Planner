@@ -10,8 +10,16 @@ import {
   metaSobrepoeIntervalo,
   navegarReferencia,
 } from '../../../core/utils/date-range.util';
+import { DIAS_SEMANA_ABREV, DiaCalendario, construirGradeMes } from '../../../core/utils/calendar.util';
+import { formatarDataLocal } from '../../../core/utils/date-format.util';
 
 const STATUS_OPCOES: MetaStatus[] = ['não cumprida', 'parcialmente cumprida', 'cumprida'];
+
+interface MesAno {
+  data: Date;
+  nome: string;
+  grade: DiaCalendario[][];
+}
 
 @Component({
   selector: 'app-metas-list',
@@ -24,6 +32,7 @@ export class MetasList {
   private readonly categoriaService = inject(CategoriaService);
 
   protected readonly statusOpcoes = STATUS_OPCOES;
+  protected readonly diasSemanaAbrev = DIAS_SEMANA_ABREV;
 
   protected readonly todasMetas = signal<Meta[]>([]);
   protected readonly categorias = signal<Categoria[]>([]);
@@ -51,6 +60,29 @@ export class MetasList {
     const { inicio, fim } = this.intervalo();
     const formatador = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
     return `${formatador.format(inicio)} – ${formatador.format(fim)}`;
+  });
+
+  protected readonly diasSemana = computed(() => {
+    const inicio = this.intervalo().inicio;
+    return Array.from({ length: 7 }, (_, i) => {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+      return dia;
+    });
+  });
+
+  protected readonly gradeMes = computed(() => construirGradeMes(this.referencia()));
+
+  protected readonly mesesAno = computed<MesAno[]>(() => {
+    const ano = this.referencia().getFullYear();
+    return Array.from({ length: 12 }, (_, mes) => {
+      const data = new Date(ano, mes, 1);
+      return {
+        data,
+        nome: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(data),
+        grade: construirGradeMes(data),
+      };
+    });
   });
 
   constructor() {
@@ -84,6 +116,37 @@ export class MetasList {
 
   protected navegar(direcao: 1 | -1): void {
     this.referencia.update((referencia) => navegarReferencia(referencia, this.tipoPeriodo(), direcao));
+  }
+
+  protected selecionarDia(dia: Date): void {
+    this.referencia.set(dia);
+    this.tipoPeriodo.set('semana');
+  }
+
+  protected selecionarMes(mes: Date): void {
+    this.referencia.set(mes);
+    this.tipoPeriodo.set('mes');
+  }
+
+  protected metasDoDia(dia: Date): Meta[] {
+    return this.todasMetas().filter((meta) => metaSobrepoeIntervalo(meta, { inicio: dia, fim: dia }));
+  }
+
+  protected coresDoDia(dia: Date): string[] {
+    const cores = this.metasDoDia(dia).map((meta) => this.corDaCategoria(meta));
+    return Array.from(new Set(cores)).slice(0, 3);
+  }
+
+  protected ehHoje(dia: Date): boolean {
+    return formatarDataLocal(dia) === formatarDataLocal(new Date());
+  }
+
+  protected numeroDia(dia: Date): number {
+    return dia.getDate();
+  }
+
+  protected diaSemanaAbrev(dia: Date): string {
+    return DIAS_SEMANA_ABREV[(dia.getDay() + 6) % 7];
   }
 
   protected corDaCategoria(meta: Meta): string {
