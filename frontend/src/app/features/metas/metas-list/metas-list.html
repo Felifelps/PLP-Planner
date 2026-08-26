@@ -65,11 +65,10 @@
           <div class="meta-card__rodape">
             <select
               class="meta-card__status"
-              [value]="meta.status"
               (change)="mudarStatus(meta, $any($event.target).value)"
             >
               @for (opcao of statusOpcoes; track opcao) {
-                <option [value]="opcao">{{ opcao }}</option>
+                <option [value]="opcao" [selected]="opcao === meta.status">{{ opcao }}</option>
               }
             </select>
 
