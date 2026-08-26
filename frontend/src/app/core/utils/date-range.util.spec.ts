@@ -4,6 +4,7 @@ import {
   intervaloAno,
   intervaloMes,
   intervaloSemana,
+  metaCobreIntervaloInteiro,
   metaSobrepoeIntervalo,
   navegarReferencia,
 } from './date-range.util';
@@ -99,5 +100,29 @@ describe('metaSobrepoeIntervalo', () => {
   it('retorna true para meta anual que contém o intervalo inteiro', () => {
     const meta = { data_inicio: '2026-01-01T00:00:00Z', data_fim: '2026-12-31T00:00:00Z' };
     expect(metaSobrepoeIntervalo(meta, intervalo)).toBe(true);
+  });
+});
+
+describe('metaCobreIntervaloInteiro', () => {
+  const intervalo = { inicio: new Date(2026, 7, 24), fim: new Date(2026, 7, 30) };
+
+  it('retorna true para meta anual que cobre a semana inteira', () => {
+    const meta = { data_inicio: '2026-01-01T00:00:00Z', data_fim: '2026-12-31T00:00:00Z' };
+    expect(metaCobreIntervaloInteiro(meta, intervalo)).toBe(true);
+  });
+
+  it('retorna true quando a meta cobre exatamente o intervalo', () => {
+    const meta = { data_inicio: '2026-08-24T00:00:00Z', data_fim: '2026-08-30T00:00:00Z' };
+    expect(metaCobreIntervaloInteiro(meta, intervalo)).toBe(true);
+  });
+
+  it('retorna false para meta que só cobre parte do intervalo', () => {
+    const meta = { data_inicio: '2026-08-24T00:00:00Z', data_fim: '2026-08-27T00:00:00Z' };
+    expect(metaCobreIntervaloInteiro(meta, intervalo)).toBe(false);
+  });
+
+  it('retorna false para meta que começa depois do intervalo iniciar', () => {
+    const meta = { data_inicio: '2026-08-25T00:00:00Z', data_fim: '2026-09-30T00:00:00Z' };
+    expect(metaCobreIntervaloInteiro(meta, intervalo)).toBe(false);
   });
 });

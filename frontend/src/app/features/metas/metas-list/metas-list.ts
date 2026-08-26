@@ -7,6 +7,7 @@ import { Meta, MetaStatus } from '../../../core/models/meta.model';
 import {
   TipoPeriodoVisualizacao,
   calcularIntervalo,
+  metaCobreIntervaloInteiro,
   metaSobrepoeIntervalo,
   navegarReferencia,
 } from '../../../core/utils/date-range.util';
@@ -73,6 +74,18 @@ export class MetasList {
 
   protected readonly gradeMes = computed(() => construirGradeMes(this.referencia()));
 
+  // Metas que cobrem o período visível inteiro vão numa faixa única acima da grade, não repetidas em cada dia.
+  protected readonly metasAmplas = computed(() => {
+    if (this.tipoPeriodo() === 'ano') {
+      return [];
+    }
+
+    const intervalo = this.intervalo();
+    return this.todasMetas().filter((meta) => metaCobreIntervaloInteiro(meta, intervalo));
+  });
+
+  private readonly metasAmplasIds = computed(() => new Set(this.metasAmplas().map((meta) => meta.id)));
+
   protected readonly mesesAno = computed<MesAno[]>(() => {
     const ano = this.referencia().getFullYear();
     return Array.from({ length: 12 }, (_, mes) => {
@@ -130,6 +143,11 @@ export class MetasList {
 
   protected metasDoDia(dia: Date): Meta[] {
     return this.todasMetas().filter((meta) => metaSobrepoeIntervalo(meta, { inicio: dia, fim: dia }));
+  }
+
+  protected metasPontuaisDoDia(dia: Date): Meta[] {
+    const amplas = this.metasAmplasIds();
+    return this.metasDoDia(dia).filter((meta) => !amplas.has(meta.id));
   }
 
   protected coresDoDia(dia: Date): string[] {

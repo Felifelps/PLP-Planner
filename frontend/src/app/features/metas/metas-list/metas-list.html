@@ -46,6 +46,21 @@
   @if (carregando()) {
     <p class="mensagem-carregando">Carregando metas...</p>
   } @else {
+    @if (metasAmplas().length > 0) {
+      <div class="faixa-metas-amplas">
+        <span class="faixa-metas-amplas__titulo">O período todo:</span>
+        @for (meta of metasAmplas(); track meta.id) {
+          <a
+            class="chip-meta chip-meta--faixa"
+            [style.background]="corDaCategoria(meta)"
+            [routerLink]="['/metas', meta.id, 'editar']"
+          >
+            {{ meta.nome }}
+          </a>
+        }
+      </div>
+    }
+
     @switch (tipoPeriodo()) {
       @case ('semana') {
         <div class="calendario-semana">
@@ -56,7 +71,7 @@
                 <span class="dia-coluna__numero">{{ numeroDia(dia) }}</span>
               </div>
               <div class="dia-coluna__metas">
-                @for (meta of metasDoDia(dia); track meta.id) {
+                @for (meta of metasPontuaisDoDia(dia); track meta.id) {
                   <a
                     class="chip-meta"
                     [style.background]="corDaCategoria(meta)"
@@ -92,11 +107,11 @@
                 >
                   <span class="dia-celula__numero">{{ numeroDia(dia.data) }}</span>
                   <span class="dia-celula__chips">
-                    @for (meta of metasDoDia(dia.data).slice(0, 3); track meta.id) {
+                    @for (meta of metasPontuaisDoDia(dia.data).slice(0, 3); track meta.id) {
                       <span class="dia-celula__chip" [style.background]="corDaCategoria(meta)">{{ meta.nome }}</span>
                     }
-                    @if (metasDoDia(dia.data).length > 3) {
-                      <span class="dia-celula__mais">+{{ metasDoDia(dia.data).length - 3 }} mais</span>
+                    @if (metasPontuaisDoDia(dia.data).length > 3) {
+                      <span class="dia-celula__mais">+{{ metasPontuaisDoDia(dia.data).length - 3 }} mais</span>
                     }
                   </span>
                 </button>

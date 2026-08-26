@@ -78,3 +78,15 @@ export function metaSobrepoeIntervalo(
 
   return metaInicio <= intFim && metaFim >= intInicio;
 }
+
+export function metaCobreIntervaloInteiro(
+  meta: Pick<Meta, 'data_inicio' | 'data_fim'>,
+  intervalo: IntervaloData,
+): boolean {
+  const metaInicio = paraDataInput(meta.data_inicio);
+  const metaFim = paraDataInput(meta.data_fim);
+  const intInicio = formatarDataLocal(intervalo.inicio);
+  const intFim = formatarDataLocal(intervalo.fim);
+
+  return metaInicio <= intInicio && metaFim >= intFim;
+}
