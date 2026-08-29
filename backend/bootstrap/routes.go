@@ -8,7 +8,7 @@ import (
 
 func InitializeRouter(
 	dependencies *Dependencies,
-) *http.ServeMux {
+) http.Handler {
 	router := http.NewServeMux()
 
 	initializeStatusRoutes(router)
@@ -17,7 +17,7 @@ func InitializeRouter(
 	initializeCategoriaRoutes(router, dependencies.Handlers)
 	initializeTarefaRoutes(router, dependencies.Handlers)
 
-	return router
+	return withCORS(router)
 }
 
 func initializeStatusRoutes(

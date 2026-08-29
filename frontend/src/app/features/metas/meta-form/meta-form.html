@@ -1,0 +1,74 @@
+<div class="pagina">
+  <header class="topo">
+    <h1>{{ modoEdicao() ? 'Editar meta' : 'Nova meta' }}</h1>
+    <a class="link-voltar" routerLink="/metas">Voltar</a>
+  </header>
+
+  @if (erro()) {
+    <p class="mensagem-erro">{{ erro() }}</p>
+  }
+
+  <form class="formulario" [formGroup]="form" (ngSubmit)="salvar()">
+    <label class="campo">
+      <span>Nome</span>
+      <input type="text" formControlName="nome" />
+    </label>
+
+    <label class="campo">
+      <span>Descrição</span>
+      <textarea formControlName="descricao" rows="3"></textarea>
+    </label>
+
+    <label class="campo">
+      <span>Categoria</span>
+      <select formControlName="categoriaId">
+        <option [ngValue]="0" disabled>Selecione uma categoria</option>
+        @for (categoria of categorias(); track categoria.id) {
+          <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="campo-linha">
+      <label class="campo">
+        <span>Período</span>
+        <select formControlName="periodo">
+          <option value="semanal">Semanal</option>
+          <option value="mensal">Mensal</option>
+          <option value="anual">Anual</option>
+        </select>
+      </label>
+
+      <label class="campo">
+        <span>Status</span>
+        <select formControlName="status">
+          <option value="não cumprida">Não cumprida</option>
+          <option value="parcialmente cumprida">Parcialmente cumprida</option>
+          <option value="cumprida">Cumprida</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="campo-linha">
+      <label class="campo">
+        <span>Data de início</span>
+        <input type="date" formControlName="dataInicio" />
+      </label>
+
+      <label class="campo">
+        <span>Data de fim</span>
+        <input type="date" formControlName="dataFim" />
+      </label>
+    </div>
+
+    @if (form.errors?.['intervaloInvalido'] && (form.get('dataInicio')?.touched || form.get('dataFim')?.touched)) {
+      <p class="mensagem-erro">A data de início não pode ser posterior à data de fim.</p>
+    }
+
+    <div class="acoes">
+      <button type="submit" class="botao botao--primario" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</div>

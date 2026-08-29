@@ -1,0 +1,86 @@
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.topo h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.link-voltar {
+  color: var(--cor-texto-suave);
+  text-decoration: none;
+}
+
+.mensagem-erro {
+  color: var(--cor-perigo);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.campo span {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--cor-borda);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.campo-linha {
+  display: flex;
+  gap: 1rem;
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.botao {
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.botao--primario {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.botao--primario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
