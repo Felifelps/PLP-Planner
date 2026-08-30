@@ -22,6 +22,7 @@ type Services struct {
 	Categoria *services.CategoriaService
 	Tarefa    *services.TarefaService
 	Lembrete  *services.LembreteService
+	Relatorio *services.RelatorioService
 }
 
 type Handlers struct {
@@ -30,6 +31,7 @@ type Handlers struct {
 	Categoria *handlers.CategoriaHandler
 	Tarefa    *handlers.TarefaHandler
 	Lembrete  *handlers.LembreteHandler
+	Relatorio *handlers.RelatorioHandler
 }
 
 type Dependencies struct {
@@ -81,6 +83,10 @@ func initializeServices(
 		Lembrete: initializeLembreteService(
 			appRepositories.Lembrete,
 		),
+		Relatorio: initializeRelatorioService(
+			appRepositories.Meta,
+			appRepositories.Tarefa,
+		),
 	}
 }
 
@@ -98,6 +104,9 @@ func initializeHandlers(
 		Tarefa:    initializeTarefaHandler(appServices.Tarefa),
 		Lembrete: initializeLembreteHandler(
 			appServices.Lembrete,
+		),
+		Relatorio: initializeRelatorioHandler(
+			appServices.Relatorio,
 		),
 	}
 }
