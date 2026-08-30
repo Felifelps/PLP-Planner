@@ -17,6 +17,7 @@ func InitializeRouter(
 	initializeCategoriaRoutes(router, dependencies.Handlers)
 	initializeTarefaRoutes(router, dependencies.Handlers)
 	initializeLembreteRoutes(router, dependencies.Handlers)
+	initializeRelatorioRoutes(router, dependencies.Handlers)
 
 	return withCORS(router)
 }
@@ -167,5 +168,15 @@ func initializeLembreteRoutes(
 	router.HandleFunc(
 		"DELETE /lembretes/{id}",
 		appHandlers.Lembrete.Excluir,
+	)
+}
+
+func initializeRelatorioRoutes(
+	router *http.ServeMux,
+	appHandlers *Handlers,
+) {
+	router.HandleFunc(
+		"GET /relatorios",
+		appHandlers.Relatorio.Gerar,
 	)
 }

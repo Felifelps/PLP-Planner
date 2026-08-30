@@ -137,6 +137,65 @@ func (r *TarefaRepository) BuscarTodos(
 	return tarefas, nil
 }
 
+func (r *TarefaRepository) BuscarPorPeriodo(
+	ctx context.Context,
+	dataInicio string,
+	dataFim string,
+) ([]models.Tarefa, error) {
+
+	query := `
+		SELECT
+			id,
+			descricao,
+			categoria_id,
+			data,
+			horario_inicio,
+			duracao,
+			turno,
+			status,
+			prioridade
+		FROM tarefas
+		WHERE data >= $1 AND data <= $2
+		ORDER BY data, id
+	`
+
+	rows, err := r.db.Query(ctx, query, dataInicio, dataFim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tarefas := make([]models.Tarefa, 0)
+
+	for rows.Next() {
+		var tarefa models.Tarefa
+
+		err := rows.Scan(
+			&tarefa.ID,
+			&tarefa.Descricao,
+			&tarefa.CategoriaID,
+			&tarefa.Data,
+			&tarefa.HorarioInicio,
+			&tarefa.Duracao,
+			&tarefa.Turno,
+			&tarefa.Status,
+			&tarefa.Prioridade,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tarefas = append(tarefas, tarefa)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tarefas, nil
+}
+
 func (r *TarefaRepository) BuscarPorID(
 	ctx context.Context,
 	id int64,
