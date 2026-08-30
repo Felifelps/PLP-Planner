@@ -1,0 +1,38 @@
+<div class="pagina-home">
+  <header class="topo-home">
+    <h1>Olá! Aqui está o seu resumo de hoje.</h1>
+    <p>Acompanhe sua produtividade e vá direto para o que importa.</p>
+  </header>
+
+  <div class="dashboard-grid">
+    <div class="card-widget" routerLink="/tarefas">
+      <h3>Tarefas de Hoje</h3>
+      <div class="widget-dados">
+        <div class="dado"><strong>{{ resumo().tarefasPendentes }}</strong> pendentes</div>
+        <div class="dado"><strong>{{ resumo().tarefasConcluidas }}</strong> concluídas</div>
+      </div>
+    </div>
+
+    <div class="card-widget" routerLink="/metas">
+      <h3>Suas Metas</h3>
+      <div class="widget-dados">
+        <div class="dado"><strong>{{ resumo().metasAndamento }}</strong> em andamento</div>
+      </div>
+    </div>
+
+    <div class="card-widget lembrete-widget">
+      <h3>Lembretes</h3>
+      <div class="widget-dados">
+        <div class="dado"><strong>{{ resumo().lembretesHoje }}</strong> para hoje</div>
+      </div>
+    </div>
+
+    <div class="card-widget destaque-produtividade">
+      <h3>Produtividade Diária</h3>
+      <div class="barra-progresso-fundo">
+        <div class="barra-progresso-preenchimento" [style.width.%]="resumo().produtividade"></div>
+      </div>
+      <p>{{ resumo().produtividade }}% das atividades concluídas</p>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,7 @@ const (
 	StatusParcialmenteExecutada StatusTarefa = "parcialmente executada"
 	StatusCancelada             StatusTarefa = "cancelada"
 	StatusAdiada                StatusTarefa = "adiada"
+	StatusPendente              StatusTarefa = "pendente"
 )
 
 type Prioridade string
@@ -94,6 +95,7 @@ func StatusTarefaValido(status StatusTarefa) bool {
 	case StatusExecutada,
 		StatusParcialmenteExecutada,
 		StatusCancelada,
+		StatusPendente,
 		StatusAdiada:
 		return true
 	default:
