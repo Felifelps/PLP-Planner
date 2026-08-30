@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS metas (
     periodo VARCHAR(20) NOT NULL
         CHECK (
             periodo IN (
+                'diario',
                 'semanal',
                 'mensal',
                 'anual'

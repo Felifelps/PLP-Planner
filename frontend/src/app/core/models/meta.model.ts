@@ -1,6 +1,6 @@
 export type MetaStatus = 'cumprida' | 'parcialmente cumprida' | 'não cumprida';
 
-export type MetaPeriodo = 'semanal' | 'mensal' | 'anual';
+export type MetaPeriodo = 'diario' | 'semanal' | 'mensal' | 'anual';
 
 export interface Meta {
   id: number;

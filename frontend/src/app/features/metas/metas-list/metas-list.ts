@@ -60,6 +60,11 @@ export class MetasList {
   protected readonly rotuloIntervalo = computed(() => {
     const { inicio, fim } = this.intervalo();
     const formatador = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    if (this.tipoPeriodo() === 'dia') {
+      return formatador.format(inicio);
+    }
+
     return `${formatador.format(inicio)} – ${formatador.format(fim)}`;
   });
 
@@ -76,7 +81,7 @@ export class MetasList {
 
   // Metas que cobrem o período visível inteiro vão numa faixa única acima da grade, não repetidas em cada dia.
   protected readonly metasAmplas = computed(() => {
-    if (this.tipoPeriodo() === 'ano') {
+    if (this.tipoPeriodo() === 'ano' || this.tipoPeriodo() === 'dia') {
       return [];
     }
 
@@ -133,7 +138,7 @@ export class MetasList {
 
   protected selecionarDia(dia: Date): void {
     this.referencia.set(dia);
-    this.tipoPeriodo.set('semana');
+    this.tipoPeriodo.set('dia');
   }
 
   protected selecionarMes(mes: Date): void {
@@ -142,12 +147,16 @@ export class MetasList {
   }
 
   protected metasDoDia(dia: Date): Meta[] {
-    return this.todasMetas().filter((meta) => metaSobrepoeIntervalo(meta, { inicio: dia, fim: dia }));
+    const inicioDia = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), 0, 0, 0, 0);
+    const fimDia = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), 23, 59, 59, 999);
+
+    return this.todasMetas().filter((meta) => 
+      metaSobrepoeIntervalo(meta, { inicio: inicioDia, fim: fimDia })
+    );
   }
 
   protected metasPontuaisDoDia(dia: Date): Meta[] {
-    const amplas = this.metasAmplasIds();
-    return this.metasDoDia(dia).filter((meta) => !amplas.has(meta.id));
+    return this.metasDoDia(dia);
   }
 
   protected coresDoDia(dia: Date): string[] {

@@ -47,7 +47,7 @@ export class MetaForm {
       nome: ['', Validators.required],
       descricao: [''],
       categoriaId: [0, [Validators.required, Validators.min(1)]],
-      periodo: ['semanal' as MetaPeriodo, Validators.required],
+      periodo: ['diario' as MetaPeriodo, Validators.required], // Alterado para aceitar 'diario'
       status: ['não cumprida' as MetaStatus, Validators.required],
       dataInicio: ['', Validators.required],
       dataFim: ['', Validators.required],
@@ -61,6 +61,23 @@ export class MetaForm {
     this.categoriaService.listarTodas().subscribe({
       next: (categorias) => this.categorias.set(categorias),
       error: () => this.erro.set('Não foi possível carregar as categorias.'),
+    });
+
+    // Se o período for alterado para 'diario', iguala a dataFim com a dataInicio
+    this.form.get('periodo')?.valueChanges.subscribe((periodo) => {
+      if (periodo === 'diario' as MetaPeriodo) {
+        const inicio = this.form.get('dataInicio')?.value;
+        if (inicio) {
+          this.form.patchValue({ dataFim: inicio });
+        }
+      }
+    });
+
+    // Ao mudar a dataInicio e o período for 'diario', atualiza a dataFim também
+    this.form.get('dataInicio')?.valueChanges.subscribe((inicio) => {
+      if (this.form.get('periodo')?.value === ('diario' as MetaPeriodo) && inicio) {
+        this.form.patchValue({ dataFim: inicio });
+      }
     });
 
     effect(() => {

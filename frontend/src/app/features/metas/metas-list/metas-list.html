@@ -9,6 +9,14 @@
       <button
         type="button"
         class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'dia'"
+        (click)="selecionarPeriodo('dia')"
+      >
+        Dia
+      </button>
+      <button
+        type="button"
+        class="botao-periodo"
         [class.botao-periodo--ativo]="tipoPeriodo() === 'semana'"
         (click)="selecionarPeriodo('semana')"
       >
@@ -62,6 +70,30 @@
     }
 
     @switch (tipoPeriodo()) {
+      @case ('dia') {
+        <div class="calendario-dia">
+          <div class="dia-coluna dia-coluna--destaque" [class.dia-coluna--hoje]="ehHoje(referencia())">
+            <div class="dia-coluna__cabecalho">
+              <span class="dia-coluna__nome">{{ diaSemanaAbrev(referencia()) }}</span>
+              <span class="dia-coluna__numero">{{ numeroDia(referencia()) }}</span>
+            </div>
+            <div class="dia-coluna__metas">
+              @for (meta of metasDoDia(referencia()); track meta.id) {
+                <a
+                  class="chip-meta"
+                  [style.background]="corDaCategoria(meta)"
+                  [routerLink]="['/metas', meta.id, 'editar']"
+                >
+                  {{ meta.nome }}
+                </a>
+              } @empty {
+                <span class="dia-coluna__vazio">—</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
       @case ('semana') {
         <div class="calendario-semana">
           @for (dia of diasSemana(); track dia.getTime()) {

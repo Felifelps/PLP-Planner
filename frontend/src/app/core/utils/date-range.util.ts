@@ -1,11 +1,16 @@
 import { Meta } from '../models/meta.model';
 import { formatarDataLocal, paraDataInput } from './date-format.util';
 
-export type TipoPeriodoVisualizacao = 'semana' | 'mes' | 'ano';
+export type TipoPeriodoVisualizacao = 'dia' | 'semana' | 'mes' | 'ano';
 
 export interface IntervaloData {
   inicio: Date;
   fim: Date;
+}
+
+export function intervaloDia(referencia: Date): IntervaloData {
+  const base = new Date(referencia.getFullYear(), referencia.getMonth(), referencia.getDate());
+  return { inicio: base, fim: base };
 }
 
 export function intervaloSemana(referencia: Date): IntervaloData {
@@ -40,6 +45,8 @@ export function calcularIntervalo(
   referencia: Date,
 ): IntervaloData {
   switch (tipo) {
+    case 'dia':
+      return intervaloDia(referencia);
     case 'semana':
       return intervaloSemana(referencia);
     case 'mes':
@@ -56,7 +63,9 @@ export function navegarReferencia(
 ): Date {
   const nova = new Date(referencia);
 
-  if (tipo === 'semana') {
+  if (tipo === 'dia') {
+    nova.setDate(nova.getDate() + direcao);
+  } else if (tipo === 'semana') {
     nova.setDate(nova.getDate() + 7 * direcao);
   } else if (tipo === 'mes') {
     nova.setMonth(nova.getMonth() + direcao);

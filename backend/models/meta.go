@@ -16,6 +16,7 @@ const (
 type Periodo string
 
 const (
+	PeriodoDiario Periodo = "diario"
 	PeriodoSemanal Periodo = "semanal"
 	PeriodoMensal  Periodo = "mensal"
 	PeriodoAnual   Periodo = "anual"
@@ -63,7 +64,8 @@ func StatusValido(status Status) bool {
 
 func PeriodoValido(periodo Periodo) bool {
 	switch periodo {
-	case PeriodoSemanal,
+	case PeriodoDiario, 
+		PeriodoSemanal,
 		PeriodoMensal,
 		PeriodoAnual:
 		return true
