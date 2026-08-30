@@ -13,6 +13,7 @@ type Repositories struct {
 	Meta      *repositories.MetaRepository
 	Categoria *repositories.CategoriaRepository
 	Tarefa    *repositories.TarefaRepository
+	Lembrete  *repositories.LembreteRepository
 }
 
 type Services struct {
@@ -20,6 +21,7 @@ type Services struct {
 	Meta      *services.MetaService
 	Categoria *services.CategoriaService
 	Tarefa    *services.TarefaService
+	Lembrete  *services.LembreteService
 }
 
 type Handlers struct {
@@ -27,6 +29,7 @@ type Handlers struct {
 	Meta      *handlers.MetaHandler
 	Categoria *handlers.CategoriaHandler
 	Tarefa    *handlers.TarefaHandler
+	Lembrete  *handlers.LembreteHandler
 }
 
 type Dependencies struct {
@@ -59,6 +62,7 @@ func initializeRepositories(
 
 		Categoria: initializeCategoriaRepository(db),
 		Tarefa:    initializeTarefaRepository(db),
+		Lembrete:  initializeLembreteRepository(db),
 	}
 }
 
@@ -74,6 +78,9 @@ func initializeServices(
 
 		Categoria: initializeCategoriaService(appRepositories.Categoria),
 		Tarefa:    initializeTarefaService(appRepositories.Tarefa),
+		Lembrete: initializeLembreteService(
+			appRepositories.Lembrete,
+		),
 	}
 }
 
@@ -89,5 +96,8 @@ func initializeHandlers(
 
 		Categoria: initializeCategoriaHandler(appServices.Categoria),
 		Tarefa:    initializeTarefaHandler(appServices.Tarefa),
+		Lembrete: initializeLembreteHandler(
+			appServices.Lembrete,
+		),
 	}
 }
