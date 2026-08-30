@@ -71,7 +71,7 @@
                 <span class="dia-coluna__numero">{{ numeroDia(dia) }}</span>
               </div>
               <div class="dia-coluna__metas">
-                @for (meta of metasPontuaisDoDia(dia); track meta.id) {
+                @for (meta of metasDoDia(dia); track meta.id) {
                   <a
                     class="chip-meta"
                     [style.background]="corDaCategoria(meta)"
