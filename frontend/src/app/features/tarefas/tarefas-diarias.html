@@ -1,0 +1,236 @@
+<div class="pagina-planner">
+  <!-- CABEÇALHO E NAVEGAÇÃO DE DATA -->
+  <header class="topo">
+    <div class="topo__info">
+      <h1>Tarefas de Hoje</h1>
+      <span class="topo__data-extenso">{{ dataFormatada() }}</span>
+    </div>
+
+    <div class="topo__acoes">
+      <div class="navegacao-data">
+        <button type="button" class="botao-icone" (click)="navegarDia(-1)" aria-label="Dia anterior">‹</button>
+        <button type="button" class="botao-hoje" (click)="irParaHoje()">Hoje</button>
+        <button type="button" class="botao-icone" (click)="navegarDia(1)" aria-label="Próximo dia">›</button>
+      </div>
+
+      <button type="button" class="botao botao--primario" (click)="exibindoModalTarefa.set(true)">
+        + Nova Tarefa
+      </button>
+    </div>
+  </header>
+
+  <!-- MODAL / FORMULÁRIO DE TAREFA -->
+  @if (exibindoModalTarefa()) {
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <h2>Nova Tarefa</h2>
+        <form [formGroup]="formTarefa" (ngSubmit)="salvarTarefa()">
+          <label class="campo">
+            <span>Descrição</span>
+            <input type="text" formControlName="descricao" placeholder="Ex: Finalizar documentação" />
+          </label>
+
+          <div class="campo-linha">
+            <label class="campo">
+              <span>Categoria</span>
+              <select formControlName="categoriaId">
+                @for (cat of categorias(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.nome }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="campo">
+              <span>Prioridade</span>
+              <select formControlName="prioridade">
+                @for (p of prioridadeOpcoes; track p) {
+                  <option [value]="p">{{ p | titlecase }}</option>
+                }
+              </select>
+            </label>
+          </div>
+
+          <!-- SELETOR DE MODO: HORÁRIO VS TURNO -->
+          <div class="campo">
+            <span>Tipo de Agendamento</span>
+            <div class="seletor-tipo">
+              <button
+                type="button"
+                class="btn-toggle"
+                [class.btn-toggle--ativo]="tipoAgendamento() === 'horario'"
+                (click)="tipoAgendamento.set('horario')"
+              >
+                Horário Fixo
+              </button>
+              <button
+                type="button"
+                class="btn-toggle"
+                [class.btn-toggle--ativo]="tipoAgendamento() === 'turno'"
+                (click)="tipoAgendamento.set('turno')"
+              >
+                Turno
+              </button>
+            </div>
+          </div>
+
+          @if (tipoAgendamento() === 'horario') {
+            <div class="campo-linha">
+              <label class="campo">
+                <span>Horário de Início</span>
+                <input type="time" formControlName="horarioInicio" />
+              </label>
+              <label class="campo">
+                <span>Duração</span>
+                <select formControlName="duracao">
+                  <option value="30min">30 minutos</option>
+                  <option value="1h">1 hora</option>
+                </select>
+              </label>
+            </div>
+          } @else {
+            <label class="campo">
+              <span>Turno</span>
+              <select formControlName="turno">
+                <option value="manhã">Manhã</option>
+                <option value="tarde">Tarde</option>
+                <option value="noite">Noite</option>
+              </select>
+            </label>
+          }
+
+          <label class="campo">
+            <span>Status Inicial</span>
+            <select formControlName="status">
+              @for (st of statusOpcoes; track st) {
+                <option [value]="st">{{ st | titlecase }}</option>
+              }
+            </select>
+          </label>
+
+          <div class="acoes-modal">
+            <button type="button" class="botao botao--secundario" (click)="exibindoModalTarefa.set(false)">Cancelar</button>
+            <button type="submit" class="botao botao--primario">Salvar Tarefa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- CORPO PRINCIPAL -->
+  <div class="planner-layout">
+    <!-- COLUNA ESQUERDA: AGENDA DE TAREFAS -->
+    <section class="agenda">
+      <div class="agenda-cabecalho">
+        <h2>Agenda</h2>
+        <div class="botoes-visualizacao">
+          <button type="button" class="btn-opcao" [class.btn-opcao--ativo]="granularidade() === '30min'" (click)="granularidade.set('30min')">30 min</button>
+          <button type="button" class="btn-opcao" [class.btn-opcao--ativo]="granularidade() === '1h'" (click)="granularidade.set('1h')">1 hora</button>
+          <button type="button" class="btn-opcao" [class.btn-opcao--ativo]="granularidade() === 'turno'" (click)="granularidade.set('turno')">Turno</button>
+        </div>
+      </div>
+
+      <!-- TAREFAS POR TURNO (QUANDO A VISUALIZAÇÃO ESTÁ EM HORAS) -->
+      @if (tarefasPorTurno().length > 0) {
+        <div class="bloco-turnos-gerais">
+          <span class="bloco-turnos-gerais__titulo">Tarefas por Turno do Dia:</span>
+          <div class="cards-turno-horizontal">
+            @for (tarefa of tarefasPorTurno(); track tarefa.id) {
+              <div class="card-tarefa" [style.border-left-color]="corDaCategoria(tarefa.categoria_id)">
+                <div class="card-tarefa__detalhes">
+                  <strong>{{ tarefa.descricao }}</strong>
+                  <div class="card-tarefa__tags">
+                    <span class="badge-turno">{{ tarefa.turno }}</span>
+                    <span class="badge-prioridade badge-prioridade--{{ tarefa.prioridade }}">{{ tarefa.prioridade }}</span>
+                  </div>
+                </div>
+                <select class="status-select status-select--{{ tarefa.status.replace(' ', '-') }}" [value]="tarefa.status" (change)="mudarStatusTarefa(tarefa, $any($event.target).value)">
+                  @for (st of statusOpcoes; track st) {
+                    <option [value]="st">{{ st }}</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="grade-horas">
+        @for (bloco of blocosGrade(); track bloco.rotulo) {
+          <div class="linha-hora" [class.linha-hora--turno]="granularidade() === 'turno'">
+            <span class="hora-rotulo">{{ bloco.rotulo }}</span>
+            <div class="hora-conteudo">
+              @for (tarefa of tarefasDoBloco(bloco); track tarefa.id) {
+                <div class="card-tarefa" [style.border-left-color]="corDaCategoria(tarefa.categoria_id)">
+                  <div class="card-tarefa__detalhes">
+                    <span class="card-tarefa__descricao" [class.concluida]="tarefa.status === 'executada'">{{ tarefa.descricao }}</span>
+                    <div class="card-tarefa__tags">
+                      <span class="badge-cat" [style.background]="corDaCategoria(tarefa.categoria_id)">{{ nomeDaCategoria(tarefa.categoria_id) }}</span>
+                      @if (tarefa.duracao) {
+                        <span class="badge-duracao">{{ tarefa.duracao }}</span>
+                      }
+                      <span class="badge-prioridade badge-prioridade--{{ tarefa.prioridade }}">{{ tarefa.prioridade }}</span>
+                    </div>
+                  </div>
+
+                  <select class="status-select status-select--{{ tarefa.status.replace(' ', '-') }}" [value]="tarefa.status" (change)="mudarStatusTarefa(tarefa, $any($event.target).value)">
+                    @for (st of statusOpcoes; track st) {
+                      <option [value]="st">{{ st }}</option>
+                    }
+                  </select>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- COLUNA DIREITA: LEMBRETES -->
+    <section class="painel-lembretes">
+      <h2>Lembretes da Semana</h2>
+
+      <!-- FORMULÁRIO RÁPIDO DE LEMBRETE -->
+      <form class="form-lembrete-rapido" [formGroup]="formLembrete" (ngSubmit)="adicionarLembrete()">
+        <input type="text" formControlName="descricao" placeholder="Novo lembrete..." />
+        
+        <select formControlName="tipo">
+          @for (tipo of tiposLembreteOpcoes; track tipo) {
+            <option [value]="tipo">{{ tipo | titlecase }}</option>
+          }
+        </select>
+
+        <input type="time" formControlName="horario" class="input-horario" />
+
+        <label class="check-recorrente" title="Repetir semanalmente">
+          <input type="checkbox" formControlName="recorrente" />
+          <span>🔁</span>
+        </label>
+
+        <button type="submit" class="botao-add-lembrete" title="Adicionar">+</button>
+      </form>
+
+      <!-- GRADE DE POST-ITS -->
+      <div class="grade-postits">
+        @for (lembrete of lembretes(); track lembrete.id) {
+          <div class="post-it" [style.background]="corDoTipoLembrete(lembrete.tipo)">
+            <div class="post-it__header">
+              <span class="post-it__tipo">{{ lembrete.tipo | uppercase }}</span>
+              <button type="button" class="post-it__btn-excluir" (click)="excluirLembrete(lembrete.id)">×</button>
+            </div>
+
+            <p class="post-it__texto">{{ lembrete.descricao }}</p>
+
+            <div class="post-it__rodape">
+              <span class="post-it__horario">⏰ {{ lembrete.horario }}</span>
+              @if (lembrete.recorrente) {
+                <span class="post-it__recorrente" title="Recorrente semanal">🔁 semanal</span>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="lembretes-vazio">Nenhum lembrete para esta data.</p>
+        }
+      </div>
+    </section>
+  </div>
+</div>
