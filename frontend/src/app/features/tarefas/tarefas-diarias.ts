@@ -411,22 +411,32 @@ export class TarefasDiarias {
     if (this.formTarefa.invalid) return;
     const v = this.formTarefa.getRawValue();
 
+    const ehHorario = this.tipoAgendamento() === 'horario';
+
+    const dataIsoTime = `${v.data}T00:00:00Z`;
+
     const payload: TarefaPayload = {
-      descricao: v.descricao,
+      descricao: v.descricao.trim(),
       categoria_id: Number(v.categoriaId),
-      data: paraDataApi(v.data),
+      data: dataIsoTime,
       status: v.status,
       prioridade: v.prioridade,
-      ...(this.tipoAgendamento() === 'horario'
-        ? { horario_inicio: v.horarioInicio, duracao: v.duracao }
-        : { turno: v.turno }),
+      ...(ehHorario
+        ? {
+            horario_inicio: v.horarioInicio,
+            duracao: v.duracao,
+          }
+        : {
+            turno: v.turno,
+          }),
     };
 
     this.tarefaService.criar(payload).subscribe({
       next: (tarefaCriada) => {
-        const dataCriada = String(tarefaCriada.data).slice(0, 10);
-        if (dataCriada !== this.dataIso()) {
-          const [ano, mes, dia] = dataCriada.split('-').map(Number);
+        
+        const dataFormatadaCriada = tarefaCriada.data.substring(0, 10);
+        if (dataFormatadaCriada !== this.dataIso()) {
+          const [ano, mes, dia] = dataFormatadaCriada.split('-').map(Number);
           this.dataReferencia.set(new Date(ano, mes - 1, dia));
           this.carregarDadosDoDia();
         } else {

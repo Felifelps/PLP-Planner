@@ -141,9 +141,10 @@ export class MetasList {
   }
 
   protected metasDoDia(dia: Date): Meta[] {
-    const dataFormatada = formatarDataLocal(dia);
-
+    const dataFormatada = formatarDataLocal(dia); // Retorna "YYYY-MM-DD"
+  
     return this.todasMetas().filter((meta) => {
+      // Extrai apenas a parte "YYYY-MM-DD" caso o backend mande ISO com horário
       const inicio = meta.data_inicio.substring(0, 10);
       const fim = meta.data_fim ? meta.data_fim.substring(0, 10) : inicio;
 
