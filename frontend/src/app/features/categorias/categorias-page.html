@@ -1,0 +1,56 @@
+<div class="pagina-categorias">
+  <header class="topo">
+    <div class="topo__info">
+      <h1>Categorias</h1>
+      <p class="topo__subtitulo">Cores usadas para destacar tarefas e metas</p>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alerta-erro">{{ erro() }}</p>
+  }
+
+  <form class="form-categoria" [formGroup]="form" (ngSubmit)="salvar()">
+    <span class="form-categoria__titulo">{{ tituloForm() }}</span>
+
+    <div class="form-categoria__linha">
+      <label class="campo campo--cresce">
+        <span>Nome</span>
+        <input type="text" formControlName="nome" placeholder="Ex: Faculdade" maxlength="100" />
+      </label>
+
+      <label class="campo campo--cor">
+        <span>Cor</span>
+        <input type="color" formControlName="cor" />
+      </label>
+
+      <button type="submit" class="botao botao--primario" [disabled]="form.invalid">
+        {{ emEdicao() ? 'Salvar' : 'Adicionar' }}
+      </button>
+
+      @if (emEdicao()) {
+        <button type="button" class="botao botao--secundario" (click)="cancelarEdicao()">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  @if (carregando()) {
+    <p class="lista-vazia">Carregando...</p>
+  } @else if (categorias().length === 0) {
+    <p class="lista-vazia">Nenhuma categoria cadastrada.</p>
+  } @else {
+    <ul class="lista-categorias">
+      @for (categoria of categorias(); track categoria.id) {
+        <li class="linha-categoria" [class.linha-categoria--edicao]="emEdicao()?.id === categoria.id">
+          <span class="amostra-cor" [style.background]="categoria.cor"></span>
+          <span class="linha-categoria__nome">{{ categoria.nome }}</span>
+          <span class="linha-categoria__hex">{{ categoria.cor }}</span>
+          <div class="linha-categoria__acoes">
+            <button type="button" class="botao-link" (click)="iniciarEdicao(categoria)">Editar</button>
+            <button type="button" class="botao-link botao-link--perigo" (click)="excluir(categoria)">Excluir</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

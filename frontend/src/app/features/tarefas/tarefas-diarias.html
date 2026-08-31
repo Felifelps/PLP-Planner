@@ -7,7 +7,7 @@
 
     <div class="topo__acoes">
       @if (abaAtiva() === 'agenda') {
-        <button type="button" class="botao botao--primario" (click)="exibindoModalTarefa.set(true)">
+        <button type="button" class="botao botao--primario" (click)="abrirModalNovaTarefa()">
           + Nova Tarefa
         </button>
       }
@@ -39,7 +39,7 @@
   <div class="barra-data">
     <button type="button" class="barra-data__seta" (click)="navegar(-1)" aria-label="Anterior">‹</button>
     <div class="barra-data__atual">
-      @if (abaAtiva() === 'lembretes') {
+      @if (abaAtiva() === 'lembretes' || modoAgenda() === 'semana') {
         <strong>Semana de {{ rotuloSemana() }}</strong>
       } @else {
         <strong>{{ rotuloDiaSelecionado() }}</strong>
@@ -48,6 +48,27 @@
     <button type="button" class="barra-data__seta" (click)="navegar(1)" aria-label="Próximo">›</button>
     @if (!ehHoje()) {
       <button type="button" class="barra-data__hoje" (click)="irParaHoje()">Ir para hoje</button>
+    }
+
+    @if (abaAtiva() === 'agenda') {
+      <div class="modo-agenda">
+        <button
+          type="button"
+          class="modo-agenda__btn"
+          [class.modo-agenda__btn--ativo]="modoAgenda() === 'dia'"
+          (click)="mudarModoAgenda('dia')"
+        >
+          Dia
+        </button>
+        <button
+          type="button"
+          class="modo-agenda__btn"
+          [class.modo-agenda__btn--ativo]="modoAgenda() === 'semana'"
+          (click)="mudarModoAgenda('semana')"
+        >
+          Semana
+        </button>
+      </div>
     }
   </div>
 
@@ -146,7 +167,44 @@
     </div>
   }
 
-  @if (abaAtiva() === 'agenda') {
+  @if (abaAtiva() === 'agenda' && modoAgenda() === 'semana') {
+    <section class="semana-agenda">
+      <div class="semana-agenda__grade">
+        @for (dia of tarefasSemanaPorDia(); track dia.iso) {
+          <div class="coluna-dia" [class.coluna-dia--hoje]="dia.ehHoje">
+            <div class="coluna-dia__cabecalho">
+              <span class="coluna-dia__rotulo">{{ dia.rotulo }}</span>
+              @if (dia.ehHoje) {
+                <span class="coluna-dia__tag">hoje</span>
+              }
+            </div>
+
+            @for (tarefa of dia.itens; track tarefa.id) {
+              <div class="mini-tarefa" [style.border-left-color]="corDaCategoria(tarefa.categoria_id)">
+                <span class="mini-tarefa__quando">
+                  {{ tarefa.horario_inicio || (tarefa.turno | titlecase) }}
+                </span>
+                <span class="mini-tarefa__desc" [class.concluida]="tarefa.status === 'executada'">
+                  {{ tarefa.descricao }}
+                </span>
+                <select
+                  class="status-select status-select--{{ tarefa.status.replace(' ', '-') }}"
+                  [value]="tarefa.status"
+                  (change)="mudarStatusTarefa(tarefa, $any($event.target).value)"
+                >
+                  @for (st of statusOpcoes; track st) {
+                    <option [value]="st" [selected]="st === tarefa.status">{{ st }}</option>
+                  }
+                </select>
+              </div>
+            } @empty {
+              <p class="coluna-dia__vazio">—</p>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  } @else if (abaAtiva() === 'agenda') {
     <section class="agenda">
       <div class="agenda-cabecalho">
         <span class="agenda-cabecalho__titulo">Visualização</span>
@@ -172,7 +230,7 @@
                 </div>
                 <select class="status-select status-select--{{ tarefa.status.replace(' ', '-') }}" [value]="tarefa.status" (change)="mudarStatusTarefa(tarefa, $any($event.target).value)">
                   @for (st of statusOpcoes; track st) {
-                    <option [value]="st">{{ st }}</option>
+                    <option [value]="st" [selected]="st === tarefa.status">{{ st }}</option>
                   }
                 </select>
               </div>
@@ -201,7 +259,7 @@
 
                   <select class="status-select status-select--{{ tarefa.status.replace(' ', '-') }}" [value]="tarefa.status" (change)="mudarStatusTarefa(tarefa, $any($event.target).value)">
                     @for (st of statusOpcoes; track st) {
-                      <option [value]="st">{{ st }}</option>
+                      <option [value]="st" [selected]="st === tarefa.status">{{ st }}</option>
                     }
                   </select>
                 </div>

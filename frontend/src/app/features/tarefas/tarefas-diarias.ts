@@ -1,6 +1,7 @@
 import { TitleCasePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { Categoria } from '../../core/models/categoria.model';
 import { Lembrete, LembretePayload, TipoLembrete } from '../../core/models/lembrete.model';
 import {
@@ -14,10 +15,11 @@ import {
 import { CategoriaService } from '../../core/services/categoria.service';
 import { LembreteService } from '../../core/services/lembrete.service';
 import { TarefaService } from '../../core/services/tarefa.service';
-import { formatarDataLocal } from '../../core/utils/date-format.util';
+import { formatarDataLocal, paraDataApi } from '../../core/utils/date-format.util';
 import { intervaloSemana } from '../../core/utils/date-range.util';
 
 type AbaTarefas = 'agenda' | 'lembretes';
+type ModoAgenda = 'dia' | 'semana';
 
 interface DiaLembrete {
   iso: string;
@@ -25,6 +27,15 @@ interface DiaLembrete {
   ehHoje: boolean;
   itens: Lembrete[];
 }
+
+interface DiaTarefa {
+  iso: string;
+  rotulo: string;
+  ehHoje: boolean;
+  itens: Tarefa[];
+}
+
+const ORDEM_TURNO: Record<string, number> = { 'manhã': 0, tarde: 1, noite: 2 };
 
 export type TipoGranularidade = '30min' | '1h' | 'turno';
 
@@ -88,6 +99,8 @@ export class TarefasDiarias {
   protected readonly exibindoModalTarefa = signal(false);
   protected readonly tipoAgendamento = signal<'horario' | 'turno'>('horario');
   protected readonly abaAtiva = signal<AbaTarefas>('agenda');
+  protected readonly modoAgenda = signal<ModoAgenda>('dia');
+  protected readonly tarefasSemana = signal<Tarefa[]>([]);
 
   protected readonly categoriaPorId = computed(
     () => new Map(this.categorias().map((c) => [c.id, c]))
@@ -123,7 +136,7 @@ export class TarefasDiarias {
     const fmt = (d: Date) =>
       new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' })
         .format(d)
-        .replace('.', '');
+        .replaceAll('.', '');
     return `${fmt(inicio)} a ${fmt(fim)} de ${fim.getFullYear()}`;
   });
 
@@ -155,6 +168,51 @@ export class TarefasDiarias {
       };
     });
   });
+
+  protected readonly tarefasSemanaPorDia = computed<DiaTarefa[]>(() => {
+    const { inicio } = this.semanaSelecionada();
+    const hojeIso = formatarDataLocal(new Date());
+
+    const porData = new Map<string, Tarefa[]>();
+    for (const tarefa of this.tarefasSemana()) {
+      const iso = String(tarefa.data).slice(0, 10);
+      const lista = porData.get(iso) ?? [];
+      lista.push(tarefa);
+      porData.set(iso, lista);
+    }
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+      const iso = formatarDataLocal(dia);
+
+      return {
+        iso,
+        ehHoje: iso === hojeIso,
+        rotulo: new Intl.DateTimeFormat('pt-BR', {
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+        })
+          .format(dia)
+          .replaceAll('.', ''),
+        itens: (porData.get(iso) ?? []).sort(
+          (a, b) => this.ordemTarefa(a) - this.ordemTarefa(b)
+        ),
+      };
+    });
+  });
+
+  private ordemTarefa(t: Tarefa): number {
+    if (t.horario_inicio) {
+      const [h, m] = t.horario_inicio.split(':').map(Number);
+      return h * 60 + m;
+    }
+    if (t.turno) {
+      return 2000 + (ORDEM_TURNO[t.turno] ?? 9);
+    }
+    return 9999;
+  }
 
   protected readonly blocosGrade = computed<BlocoTempo[]>(() => {
     const modo = this.granularidade();
@@ -218,12 +276,38 @@ export class TarefasDiarias {
   }
 
   private carregarDadosDoDia(): void {
+    this.carregarTarefasDoDia();
+
+    if (this.abaAtiva() === 'agenda' && this.modoAgenda() === 'semana') {
+      this.carregarTarefasDaSemana();
+    }
+
+    this.carregarLembretesDaSemana();
+  }
+
+  private carregarTarefasDoDia(): void {
     this.tarefaService.buscarPorData(this.dataIso()).subscribe({
       next: (dados) => this.tarefas.set(dados ?? []),
       error: (err) => console.error('Erro ao buscar tarefas:', err),
     });
+  }
 
-    this.carregarLembretesDaSemana();
+  private carregarTarefasDaSemana(): void {
+    const { inicio } = this.semanaSelecionada();
+
+    const requisicoes = Array.from({ length: 7 }, (_, i) => {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+      return this.tarefaService.buscarPorData(formatarDataLocal(dia));
+    });
+
+    forkJoin(requisicoes).subscribe({
+      next: (listas) => this.tarefasSemana.set(listas.flatMap((l) => l ?? [])),
+      error: (err) => {
+        console.error('Erro ao buscar tarefas da semana:', err);
+        this.tarefasSemana.set([]);
+      },
+    });
   }
 
   private carregarLembretesDaSemana(): void {
@@ -240,10 +324,19 @@ export class TarefasDiarias {
       });
   }
 
+  protected mudarModoAgenda(modo: ModoAgenda): void {
+    if (this.modoAgenda() === modo) return;
+    this.modoAgenda.set(modo);
+    this.carregarDadosDoDia();
+  }
+
   protected navegar(delta: number): void {
-    const passo = this.abaAtiva() === 'lembretes' ? delta * 7 : delta;
+    const porSemana =
+      this.abaAtiva() === 'lembretes' ||
+      (this.abaAtiva() === 'agenda' && this.modoAgenda() === 'semana');
+
     const proxima = new Date(this.dataReferencia());
-    proxima.setDate(proxima.getDate() + passo);
+    proxima.setDate(proxima.getDate() + (porSemana ? delta * 7 : delta));
     this.dataReferencia.set(proxima);
     this.carregarDadosDoDia();
   }
@@ -291,9 +384,10 @@ export class TarefasDiarias {
   protected mudarStatusTarefa(tarefa: Tarefa, novoStatus: StatusTarefa): void {
     this.tarefaService.atualizarStatus(tarefa.id, novoStatus).subscribe({
       next: () => {
-        this.tarefas.update((lista) =>
-          lista.map((t) => (t.id === tarefa.id ? { ...t, status: novoStatus } : t))
-        );
+        const aplicar = (lista: Tarefa[]) =>
+          lista.map((t) => (t.id === tarefa.id ? { ...t, status: novoStatus } : t));
+        this.tarefas.update(aplicar);
+        this.tarefasSemana.update(aplicar);
       },
       error: (err) => console.error('Erro ao atualizar status da tarefa:', err),
     });
@@ -347,6 +441,9 @@ export class TarefasDiarias {
           this.carregarDadosDoDia();
         } else {
           this.tarefas.update((lista) => [...lista, tarefaCriada]);
+          if (this.modoAgenda() === 'semana') {
+            this.tarefasSemana.update((lista) => [...lista, tarefaCriada]);
+          }
         }
 
         this.formTarefa.reset({

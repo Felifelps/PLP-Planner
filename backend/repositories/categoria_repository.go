@@ -5,12 +5,33 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"plp-planner/models"
 )
 
-var ErrCategoriaNaoEncontrada = errors.New("categoria não encontrada")
+var (
+	ErrCategoriaNaoEncontrada = errors.New("categoria não encontrada")
+	ErrCategoriaEmUso         = errors.New("categoria em uso por tarefas ou metas")
+	ErrCategoriaNomeDuplicado = errors.New("já existe uma categoria com esse nome")
+)
+
+func traduzErroCategoria(err error) error {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) {
+		return err
+	}
+
+	switch pgErr.Code {
+	case "23505":
+		return ErrCategoriaNomeDuplicado
+	case "23503":
+		return ErrCategoriaEmUso
+	default:
+		return err
+	}
+}
 
 type CategoriaRepository struct {
 	db *pgxpool.Pool
@@ -33,12 +54,14 @@ func (r *CategoriaRepository) Salvar(
 		RETURNING id
 	`
 
-	return r.db.QueryRow(
+	err := r.db.QueryRow(
 		ctx,
 		query,
 		categoria.Nome,
 		categoria.Cor,
 	).Scan(&categoria.ID)
+
+	return traduzErroCategoria(err)
 }
 
 func (r *CategoriaRepository) BuscarTodos(
@@ -136,7 +159,7 @@ func (r *CategoriaRepository) Atualizar(
 	)
 
 	if err != nil {
-		return err
+		return traduzErroCategoria(err)
 	}
 
 	if result.RowsAffected() == 0 {
@@ -163,7 +186,7 @@ func (r *CategoriaRepository) Excluir(
 	)
 
 	if err != nil {
-		return err
+		return traduzErroCategoria(err)
 	}
 
 	if result.RowsAffected() == 0 {

@@ -125,6 +125,133 @@
   padding: 4px 8px;
 }
 
+.modo-agenda {
+  display: flex;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 2px;
+  margin-left: 8px;
+}
+
+.modo-agenda__btn {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modo-agenda__btn--ativo {
+  background: #228be6;
+  color: #fff;
+}
+
+/* AGENDA SEMANAL */
+.semana-agenda__grade {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.coluna-dia {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+}
+
+.coluna-dia--hoje {
+  border-color: #228be6;
+  box-shadow: 0 0 0 1px #228be6 inset;
+}
+
+.coluna-dia__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.coluna-dia__rotulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #495057;
+  text-transform: capitalize;
+}
+
+.coluna-dia__tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #228be6;
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.coluna-dia__vazio {
+  margin: 0;
+  color: #ced4da;
+  font-size: 0.85rem;
+}
+
+.mini-tarefa {
+  border: 1px solid #e9ecef;
+  border-left: 4px solid #adb5bd;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #f8f9fa;
+}
+
+.mini-tarefa__quando {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #495057;
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-tarefa__desc {
+  font-size: 0.8rem;
+  color: #212529;
+  line-height: 1.25;
+}
+
+.mini-tarefa__desc.concluida {
+  text-decoration: line-through;
+  color: #868e96;
+}
+
+.mini-tarefa .status-select {
+  width: 100%;
+  font-size: 0.7rem;
+  padding: 3px 4px;
+}
+
+@media (max-width: 1000px) {
+  .semana-agenda__grade {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .semana-agenda__grade {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .agenda-cabecalho__titulo {
   font-size: 0.85rem;
   font-weight: 600;
