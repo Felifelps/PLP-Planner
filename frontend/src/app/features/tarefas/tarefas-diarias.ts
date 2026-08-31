@@ -162,13 +162,11 @@ export class TarefasDiarias {
   private carregarDadosDoDia(): void {
     const dataAtual = this.dataIso();
 
-    // 1. Busca tarefas da data selecionada
     this.tarefaService.buscarPorData(dataAtual).subscribe({
       next: (dados) => this.tarefas.set(dados ?? []),
       error: (err) => console.error('Erro ao buscar tarefas:', err),
     });
 
-    // 2. Busca lembretes da data selecionada
     this.lembreteService.buscarTodos(dataAtual, dataAtual).subscribe({
       next: (dados) => this.lembretes.set(dados ?? []),
       error: (err) => {

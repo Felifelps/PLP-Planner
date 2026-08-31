@@ -69,8 +69,8 @@ describe('RelatoriosComponent', () => {
   });
 
   it('deve calcular corretamente o total de metas cumpridas e tarefas executadas', () => {
-    expect(component.metasCumpridasTotal()).toBe(8); // 80% de 10 = 8
-    expect(component.tarefasExecutadasTotal()).toBe(15); // 75% de 20 = 15
+    expect(component.metasCumpridasTotal()).toBe(8); 
+    expect(component.tarefasExecutadasTotal()).toBe(15);
   });
 
   it('deve formatar o rotulo da semana e mes corretamente', () => {

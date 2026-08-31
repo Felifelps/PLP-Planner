@@ -10,8 +10,8 @@ export interface Lembrete {
   id: number;
   descricao: string;
   tipo: TipoLembrete;
-  data: string;      // "YYYY-MM-DD"
-  horario: string;   // "HH:MM"
+  data: string;   
+  horario: string;
   recorrente: boolean;
 }
 
