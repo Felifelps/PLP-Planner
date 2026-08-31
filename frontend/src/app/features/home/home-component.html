@@ -1,7 +1,15 @@
 <div class="pagina-home">
   <header class="topo-home">
-    <h1>Olá! Aqui está o seu resumo de hoje.</h1>
-    <p>Acompanhe sua produtividade e vá direto para o que importa.</p>
+    <div class="topo-home__info">
+      <h1>Olá! Aqui está o seu resumo de hoje.</h1>
+      <p>Acompanhe sua produtividade e vá direto para o que importa.</p>
+    </div>
+    <nav class="navegacao-secoes">
+      <a routerLink="/home" class="link-nav link-nav--ativo">Início</a>
+      <a routerLink="/tarefas" class="link-nav">Tarefas</a>
+      <a routerLink="/metas" class="link-nav">Metas</a>
+      <a routerLink="/relatorios" class="link-nav">Relatórios</a>
+    </nav>
   </header>
 
   <div class="dashboard-grid">
@@ -26,13 +34,12 @@
         <div class="dado"><strong>{{ resumo().lembretesHoje }}</strong> para hoje</div>
       </div>
     </div>
-
-    <div class="card-widget destaque-produtividade">
+    <div class="card-widget destaque-produtividade" routerLink="/relatorios">
       <h3>Produtividade Diária</h3>
       <div class="barra-progresso-fundo">
         <div class="barra-progresso-preenchimento" [style.width.%]="resumo().produtividade"></div>
       </div>
-      <p>{{ resumo().produtividade }}% das atividades concluídas</p>
+      <p>{{ resumo().produtividade }}% das atividades concluídas • Ver relatórios ›</p>
     </div>
   </div>
 </div>
