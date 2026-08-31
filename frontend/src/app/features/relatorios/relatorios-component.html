@@ -1,21 +1,43 @@
 <div class="pagina-relatorios">
-  <!-- CABEÇALHO DA PÁGINA -->
   <header class="topo">
     <div class="topo__info">
-      <h1>Relatórios de Produtividade</h1>
-      <p class="topo__subtitulo">Análise do seu desempenho em metas e tarefas executadas</p>
+      <h1>Olá! Aqui está o seu resumo.</h1>
+      <p class="topo__subtitulo">Acompanhe sua produtividade e vá direto para o que importa</p>
     </div>
-
-    <!-- NAVEGAÇÃO ENTRE TELAS -->
-    <nav class="navegacao-secoes">
-      <a routerLink="/home" class="link-nav">Início</a>
-      <a routerLink="/tarefas" class="link-nav">Tarefas</a>
-      <a routerLink="/metas" class="link-nav">Metas</a>
-      <a routerLink="/relatorios" class="link-nav link-nav--ativo">Relatórios</a>
-    </nav>
   </header>
 
-  <!-- BARRA DE FILTROS E CONTROLE DE PERÍODO -->
+  <section class="resumo-dia">
+    <a class="resumo-dia__card" routerLink="/tarefas">
+      <span class="resumo-dia__rotulo">Tarefas de hoje</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoTarefasPendentes() }}</strong> pendentes
+      </span>
+      <span class="resumo-dia__detalhe">{{ resumoTarefasConcluidas() }} concluídas</span>
+    </a>
+
+    <a class="resumo-dia__card" routerLink="/metas">
+      <span class="resumo-dia__rotulo">Metas</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoMetasEmAndamento() }}</strong> em andamento
+      </span>
+    </a>
+
+    <div class="resumo-dia__card">
+      <span class="resumo-dia__rotulo">Lembretes</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoLembretesHoje() }}</strong> para hoje
+      </span>
+    </div>
+
+    <div class="resumo-dia__card resumo-dia__card--destaque">
+      <span class="resumo-dia__rotulo">Produtividade diária</span>
+      <span class="resumo-dia__valor"><strong>{{ resumoProdutividade() }}%</strong></span>
+      <div class="resumo-dia__barra">
+        <div class="resumo-dia__barra-preenchimento" [style.width.%]="resumoProdutividade()"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="filtros">
     <div class="filtros__tipos">
       <button
@@ -52,7 +74,6 @@
     </div>
   </section>
 
-  <!-- ESTADO DE ERRO -->
   @if (erro()) {
     <div class="alerta-erro">
       <span class="alerta-erro__icone">⚠️</span>
@@ -63,7 +84,6 @@
     </div>
   }
 
-  <!-- ESTADO DE CARREGANDO -->
   @if (carregando()) {
     <div class="carregando-container">
       <div class="spinner"></div>
@@ -71,9 +91,7 @@
     </div>
   } @else if (relatorio()) {
     <div class="relatorio-conteudo">
-      <!-- CARDS PRINCIPAIS: METAS E TAREFAS -->
       <section class="resumo-grid">
-        <!-- CARD METAS CUMPRIDAS -->
         <article class="card-metrica card-metrica--metas">
           <div class="card-metrica__cabecalho">
             <span class="card-metrica__icone">🎯</span>
@@ -94,7 +112,6 @@
           </div>
         </article>
 
-        <!-- CARD TAREFAS EXECUTADAS -->
         <article class="card-metrica card-metrica--tarefas">
           <div class="card-metrica__cabecalho">
             <span class="card-metrica__icone">✅</span>
@@ -116,11 +133,9 @@
         </article>
       </section>
 
-      <!-- DESTAQUES DE PRODUTIVIDADE: SEMANAS, MESES E TURNOS -->
       <section class="secao-destaques">
         <h2 class="secao-titulo">🏆 Destaques de Produtividade</h2>
         <div class="destaques-grid">
-          <!-- SEMANA MAIS PRODUTIVA -->
           <div class="card-destaque">
             <div class="card-destaque__header">
               <span class="card-destaque__icone">📅</span>
@@ -136,7 +151,6 @@
             }
           </div>
 
-          <!-- MÊS MAIS PRODUTIVO -->
           <div class="card-destaque">
             <div class="card-destaque__header">
               <span class="card-destaque__icone">📆</span>
@@ -152,7 +166,6 @@
             }
           </div>
 
-          <!-- TURNO MAIS PRODUTIVO -->
           <div class="card-destaque">
             <div class="card-destaque__header">
               <span class="card-destaque__icone">{{ iconeTurno(relatorio()!.turno_mais_produtivo?.turno) }}</span>
@@ -170,10 +183,8 @@
         </div>
       </section>
 
-      <!-- CATEGORIAS MAIS REALIZADAS: TAREFAS E METAS -->
       <section class="secao-categorias">
         <div class="categorias-grid">
-          <!-- CATEGORIAS DE TAREFAS -->
           <div class="card-categoria-ranking">
             <div class="card-categoria-ranking__topo">
               <h2>📋 Categorias de Tarefas Mais Realizadas</h2>
@@ -214,7 +225,6 @@
             }
           </div>
 
-          <!-- CATEGORIAS DE METAS -->
           <div class="card-categoria-ranking">
             <div class="card-categoria-ranking__topo">
               <h2>🎯 Categorias de Metas Mais Realizadas</h2>

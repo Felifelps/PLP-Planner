@@ -5,7 +5,10 @@ import { RouterLink } from '@angular/router';
 import { Categoria } from '../../core/models/categoria.model';
 import { CategoriaContagem, Relatorio } from '../../core/models/relatorio.model';
 import { CategoriaService } from '../../core/services/categoria.service';
+import { LembreteService } from '../../core/services/lembrete.service';
+import { MetaService } from '../../core/services/meta.service';
 import { RelatorioService } from '../../core/services/relatorio.service';
+import { TarefaService } from '../../core/services/tarefa.service';
 import { formatarDataLocal } from '../../core/utils/date-format.util';
 import {
   IntervaloData,
@@ -24,6 +27,9 @@ import {
 export class RelatoriosComponent implements OnInit {
   private readonly relatorioService = inject(RelatorioService);
   private readonly categoriaService = inject(CategoriaService);
+  private readonly tarefaService = inject(TarefaService);
+  private readonly metaService = inject(MetaService);
+  private readonly lembreteService = inject(LembreteService);
 
   readonly tipoPeriodo = signal<TipoPeriodoVisualizacao>('mes');
   readonly dataReferencia = signal<Date>(new Date());
@@ -34,9 +40,49 @@ export class RelatoriosComponent implements OnInit {
   readonly carregando = signal<boolean>(false);
   readonly erro = signal<string | null>(null);
 
+  // Resumo do dia (bloco no topo da home)
+  readonly resumoTarefasPendentes = signal(0);
+  readonly resumoTarefasConcluidas = signal(0);
+  readonly resumoMetasEmAndamento = signal(0);
+  readonly resumoLembretesHoje = signal(0);
+  readonly resumoProdutividade = signal(0);
+
   ngOnInit(): void {
     this.carregarCategorias();
+    this.carregarResumoDoDia();
     this.atualizarIntervaloECarregar();
+  }
+
+  private carregarResumoDoDia(): void {
+    const hoje = formatarDataLocal(new Date());
+
+    this.tarefaService.buscarPorData(hoje).subscribe({
+      next: (tarefas) => {
+        const pendentes = (tarefas ?? []).filter((t) => t.status === 'pendente').length;
+        const concluidas = (tarefas ?? []).filter((t) => t.status === 'executada').length;
+
+        this.resumoTarefasPendentes.set(pendentes);
+        this.resumoTarefasConcluidas.set(concluidas);
+
+        const total = pendentes + concluidas;
+        this.resumoProdutividade.set(total > 0 ? Math.round((concluidas / total) * 100) : 0);
+      },
+      error: (err) => console.error('Erro ao buscar tarefas do dia:', err),
+    });
+
+    this.lembreteService.buscarTodos(hoje, hoje).subscribe({
+      next: (lembretes) => this.resumoLembretesHoje.set(lembretes?.length ?? 0),
+      error: (err) => {
+        console.error('Erro ao buscar lembretes do dia:', err);
+        this.resumoLembretesHoje.set(0);
+      },
+    });
+
+    this.metaService.listarTodas().subscribe({
+      next: (metas) =>
+        this.resumoMetasEmAndamento.set((metas ?? []).filter((m) => m.status !== 'cumprida').length),
+      error: (err) => console.error('Erro ao buscar metas:', err),
+    });
   }
 
   selecionarPeriodo(tipo: TipoPeriodoVisualizacao): void {
@@ -130,7 +176,6 @@ export class RelatoriosComponent implements OnInit {
 
   formatarRotuloSemana(rotulo?: string): string {
     if (!rotulo) return 'Nenhuma tarefa executada';
-    // Formato: YYYY-Wxx (ex: 2026-W36)
     const partes = rotulo.split('-W');
     if (partes.length === 2) {
       return `Semana ${partes[1]} (${partes[0]})`;
@@ -140,7 +185,6 @@ export class RelatoriosComponent implements OnInit {
 
   formatarRotuloMes(rotulo?: string): string {
     if (!rotulo) return 'Nenhuma tarefa executada';
-    // Formato: YYYY-MM (ex: 2026-09)
     const partes = rotulo.split('-');
     if (partes.length === 2) {
       const ano = parseInt(partes[0], 10);

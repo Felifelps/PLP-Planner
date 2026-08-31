@@ -1,7 +1,6 @@
-import { TitleCasePipe, UpperCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Categoria } from '../../core/models/categoria.model';
 import { Lembrete, LembretePayload, TipoLembrete } from '../../core/models/lembrete.model';
 import {
@@ -15,6 +14,17 @@ import {
 import { CategoriaService } from '../../core/services/categoria.service';
 import { LembreteService } from '../../core/services/lembrete.service';
 import { TarefaService } from '../../core/services/tarefa.service';
+import { formatarDataLocal } from '../../core/utils/date-format.util';
+import { intervaloSemana } from '../../core/utils/date-range.util';
+
+type AbaTarefas = 'agenda' | 'lembretes';
+
+interface DiaLembrete {
+  iso: string;
+  rotulo: string;
+  ehHoje: boolean;
+  itens: Lembrete[];
+}
 
 export type TipoGranularidade = '30min' | '1h' | 'turno';
 
@@ -56,7 +66,7 @@ const CORES_TIPO_LEMBRETE: Record<TipoLembrete, string> = {
 @Component({
   selector: 'app-tarefas-diarias',
   standalone: true,
-  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe],
   templateUrl: './tarefas-diarias.html',
   styleUrl: './tarefas-diarias.css',
 })
@@ -77,6 +87,7 @@ export class TarefasDiarias {
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly exibindoModalTarefa = signal(false);
   protected readonly tipoAgendamento = signal<'horario' | 'turno'>('horario');
+  protected readonly abaAtiva = signal<AbaTarefas>('agenda');
 
   protected readonly categoriaPorId = computed(
     () => new Map(this.categorias().map((c) => [c.id, c]))
@@ -91,12 +102,58 @@ export class TarefasDiarias {
     }).format(this.dataReferencia());
   });
 
-  protected readonly dataIso = computed(() => {
-    const d = this.dataReferencia();
-    const ano = d.getFullYear();
-    const mes = String(d.getMonth() + 1).padStart(2, '0');
-    const dia = String(d.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`;
+  protected readonly dataIso = computed(() => formatarDataLocal(this.dataReferencia()));
+
+  protected readonly ehHoje = computed(
+    () => this.dataIso() === formatarDataLocal(new Date())
+  );
+
+  protected readonly rotuloDiaSelecionado = computed(() =>
+    new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    }).format(this.dataReferencia())
+  );
+
+  protected readonly semanaSelecionada = computed(() => intervaloSemana(this.dataReferencia()));
+
+  protected readonly rotuloSemana = computed(() => {
+    const { inicio, fim } = this.semanaSelecionada();
+    const fmt = (d: Date) =>
+      new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' })
+        .format(d)
+        .replace('.', '');
+    return `${fmt(inicio)} a ${fmt(fim)} de ${fim.getFullYear()}`;
+  });
+
+  protected readonly lembretesPorDia = computed<DiaLembrete[]>(() => {
+    const { inicio } = this.semanaSelecionada();
+    const hojeIso = formatarDataLocal(new Date());
+
+    const porData = new Map<string, Lembrete[]>();
+    for (const lembrete of this.lembretes()) {
+      const lista = porData.get(lembrete.data) ?? [];
+      lista.push(lembrete);
+      porData.set(lembrete.data, lista);
+    }
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+      const iso = formatarDataLocal(dia);
+
+      return {
+        iso,
+        ehHoje: iso === hojeIso,
+        rotulo: new Intl.DateTimeFormat('pt-BR', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+        }).format(dia),
+        itens: (porData.get(iso) ?? []).sort((a, b) => a.horario.localeCompare(b.horario)),
+      };
+    });
   });
 
   protected readonly blocosGrade = computed<BlocoTempo[]>(() => {
@@ -143,6 +200,7 @@ export class TarefasDiarias {
   protected readonly formLembrete = this.fb.nonNullable.group({
     descricao: ['', Validators.required],
     tipo: ['compra' as TipoLembrete, Validators.required],
+    data: [this.dataIso(), Validators.required],
     horario: ['10:00', Validators.required],
     recorrente: [false],
   });
@@ -160,27 +218,32 @@ export class TarefasDiarias {
   }
 
   private carregarDadosDoDia(): void {
-    const dataAtual = this.dataIso();
-
-    // 1. Busca tarefas da data selecionada
-    this.tarefaService.buscarPorData(dataAtual).subscribe({
+    this.tarefaService.buscarPorData(this.dataIso()).subscribe({
       next: (dados) => this.tarefas.set(dados ?? []),
       error: (err) => console.error('Erro ao buscar tarefas:', err),
     });
 
-    // 2. Busca lembretes da data selecionada
-    this.lembreteService.buscarTodos(dataAtual, dataAtual).subscribe({
-      next: (dados) => this.lembretes.set(dados ?? []),
-      error: (err) => {
-        console.warn('Endpoint de lembretes indisponível ou vazio:', err);
-        this.lembretes.set([]);
-      },
-    });
+    this.carregarLembretesDaSemana();
   }
 
-  protected navegarDia(delta: number): void {
+  private carregarLembretesDaSemana(): void {
+    const { inicio, fim } = this.semanaSelecionada();
+
+    this.lembreteService
+      .buscarTodos(formatarDataLocal(inicio), formatarDataLocal(fim))
+      .subscribe({
+        next: (dados) => this.lembretes.set(dados ?? []),
+        error: (err) => {
+          console.warn('Não foi possível carregar os lembretes:', err);
+          this.lembretes.set([]);
+        },
+      });
+  }
+
+  protected navegar(delta: number): void {
+    const passo = this.abaAtiva() === 'lembretes' ? delta * 7 : delta;
     const proxima = new Date(this.dataReferencia());
-    proxima.setDate(proxima.getDate() + delta);
+    proxima.setDate(proxima.getDate() + passo);
     this.dataReferencia.set(proxima);
     this.carregarDadosDoDia();
   }
@@ -236,11 +299,16 @@ export class TarefasDiarias {
     });
   }
 
-  protected excluirLembrete(id: number): void {
-    this.lembreteService.excluir(id).subscribe({
-      next: () => {
-        this.lembretes.update((lista) => lista.filter((l) => l.id !== id));
-      },
+  protected excluirLembrete(lembrete: Lembrete): void {
+    if (
+      lembrete.recorrente &&
+      !confirm('Este lembrete se repete toda semana. Excluir remove todas as ocorrências. Continuar?')
+    ) {
+      return;
+    }
+
+    this.lembreteService.excluir(lembrete.id).subscribe({
+      next: () => this.carregarLembretesDaSemana(),
       error: (err) => console.error('Erro ao excluir lembrete:', err),
     });
   }
@@ -289,18 +357,19 @@ export class TarefasDiarias {
     const v = this.formLembrete.getRawValue();
 
     const payload: LembretePayload = {
-      descricao: v.descricao,
+      descricao: v.descricao.trim(),
       tipo: v.tipo,
-      data: this.dataIso(),
+      data: v.data,
       horario: v.horario,
       recorrente: v.recorrente,
     };
 
     this.lembreteService.criar(payload).subscribe({
-      next: (lembreteCriado) => {
-        this.lembretes.update((lista) => [...lista, lembreteCriado]);
+      next: () => {
+        this.carregarLembretesDaSemana();
         this.formLembrete.reset({
           tipo: 'compra',
+          data: this.dataIso(),
           horario: '10:00',
           recorrente: false,
         });

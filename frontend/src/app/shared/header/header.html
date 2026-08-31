@@ -1,0 +1,15 @@
+<header class="app-header">
+  <a class="app-header__marca" routerLink="/home">PLP Planner</a>
+
+  <nav class="app-header__nav">
+    <a
+      routerLink="/home"
+      routerLinkActive="app-header__link--ativo"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="app-header__link"
+      >Início</a
+    >
+    <a routerLink="/tarefas" routerLinkActive="app-header__link--ativo" class="app-header__link">Tarefas</a>
+    <a routerLink="/metas" routerLinkActive="app-header__link--ativo" class="app-header__link">Metas</a>
+  </nav>
+</header>

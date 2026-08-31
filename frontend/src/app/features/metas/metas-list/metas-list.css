@@ -18,35 +18,6 @@
   font-size: 1.75rem;
 }
 
-.navegacao-secoes {
-  display: flex;
-  gap: 0.5rem;
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  padding: 0.3rem;
-}
-
-.link-nav {
-  text-decoration: none;
-  color: var(--cor-texto-suave);
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.link-nav:hover {
-  color: var(--cor-texto);
-  background: var(--cor-fundo);
-}
-
-.link-nav--ativo {
-  background: var(--cor-primaria);
-  color: #ffffff !important;
-}
-
 .botao {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -249,7 +220,6 @@
   font-size: 0.8rem;
 }
 
-/* Visualização de semana: 7 colunas de dias */
 
 .calendario-semana {
   display: grid;
@@ -304,7 +274,6 @@
   text-align: center;
 }
 
-/* Visualização de mês: grade de semanas x dias */
 
 .calendario-mes {
   overflow-x: auto;
@@ -381,7 +350,6 @@
   color: var(--cor-texto-suave);
 }
 
-/* Visualização de ano: 12 mini-calendários de mês */
 
 .calendario-ano {
   display: grid;

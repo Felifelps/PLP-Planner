@@ -1,0 +1,50 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.app-header__marca {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cor-primaria);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-header__nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.app-header__link {
+  text-decoration: none;
+  color: var(--cor-texto-suave);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-header__link:hover {
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+.app-header__link--ativo {
+  background: var(--cor-primaria);
+  color: #ffffff;
+}
+
+.app-header__link--ativo:hover {
+  background: var(--cor-primaria-hover);
+  color: #ffffff;
+}
