@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TarefaService } from '../../core/services/tarefa.service';
 import { MetaService } from '../../core/services/meta.service';
 import { LembreteService } from '../../core/services/lembrete.service';
@@ -6,8 +7,9 @@ import { formatarDataLocal } from '../../core/utils/date-format.util';
 
 @Component({
   selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  imports: [RouterLink],
+  templateUrl: './home-component.html',
+  styleUrl: './home-component.css'
 })
 export class HomeComponent implements OnInit {
   private readonly tarefaService = inject(TarefaService);

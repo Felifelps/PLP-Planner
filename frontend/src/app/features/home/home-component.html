@@ -16,30 +16,30 @@
     <div class="card-widget" routerLink="/tarefas">
       <h3>Tarefas de Hoje</h3>
       <div class="widget-dados">
-        <div class="dado"><strong>{{ resumo().tarefasPendentes }}</strong> pendentes</div>
-        <div class="dado"><strong>{{ resumo().tarefasConcluidas }}</strong> concluídas</div>
+        <div class="dado"><strong>{{ tarefasPendentes() }}</strong> pendentes</div>
+        <div class="dado"><strong>{{ tarefasConcluidas() }}</strong> concluídas</div>
       </div>
     </div>
 
     <div class="card-widget" routerLink="/metas">
       <h3>Suas Metas</h3>
       <div class="widget-dados">
-        <div class="dado"><strong>{{ resumo().metasAndamento }}</strong> em andamento</div>
+        <div class="dado"><strong>{{ metasEmAndamento() }}</strong> em andamento</div>
       </div>
     </div>
 
     <div class="card-widget lembrete-widget">
       <h3>Lembretes</h3>
       <div class="widget-dados">
-        <div class="dado"><strong>{{ resumo().lembretesHoje }}</strong> para hoje</div>
+        <div class="dado"><strong>{{ lembretesHoje() }}</strong> para hoje</div>
       </div>
     </div>
     <div class="card-widget destaque-produtividade" routerLink="/relatorios">
       <h3>Produtividade Diária</h3>
       <div class="barra-progresso-fundo">
-        <div class="barra-progresso-preenchimento" [style.width.%]="resumo().produtividade"></div>
+        <div class="barra-progresso-preenchimento" [style.width.%]="produtividade()"></div>
       </div>
-      <p>{{ resumo().produtividade }}% das atividades concluídas • Ver relatórios ›</p>
+      <p>{{ produtividade() }}% das atividades concluídas • Ver relatórios ›</p>
     </div>
   </div>
 </div>
