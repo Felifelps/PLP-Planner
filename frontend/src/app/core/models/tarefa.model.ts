@@ -8,8 +8,8 @@ export interface Tarefa {
   id: number;
   descricao: string;
   categoria_id: number;
-  data: string; // Formato YYYY-MM-DD
-  horario_inicio?: string; // Formato HH:MM
+  data: string;
+  horario_inicio?: string;
   duracao?: DuracaoTarefa;
   turno?: TurnoTarefa;
   status: StatusTarefa;

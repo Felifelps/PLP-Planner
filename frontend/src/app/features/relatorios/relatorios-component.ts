@@ -130,7 +130,6 @@ export class RelatoriosComponent implements OnInit {
 
   formatarRotuloSemana(rotulo?: string): string {
     if (!rotulo) return 'Nenhuma tarefa executada';
-    // Formato: YYYY-Wxx (ex: 2026-W36)
     const partes = rotulo.split('-W');
     if (partes.length === 2) {
       return `Semana ${partes[1]} (${partes[0]})`;
@@ -140,7 +139,6 @@ export class RelatoriosComponent implements OnInit {
 
   formatarRotuloMes(rotulo?: string): string {
     if (!rotulo) return 'Nenhuma tarefa executada';
-    // Formato: YYYY-MM (ex: 2026-09)
     const partes = rotulo.split('-');
     if (partes.length === 2) {
       const ano = parseInt(partes[0], 10);

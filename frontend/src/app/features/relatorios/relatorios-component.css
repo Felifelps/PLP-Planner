@@ -5,7 +5,6 @@
   font-family: inherit;
 }
 
-/* TOPO & NAVEGAÇÃO */
 .topo {
   display: flex;
   align-items: center;
@@ -146,7 +145,6 @@
   text-transform: capitalize;
 }
 
-/* CARREGANDO E ERRO */
 .carregando-container {
   display: flex;
   flex-direction: column;
@@ -193,14 +191,12 @@
   font-weight: 500;
 }
 
-/* CONTEÚDO DO RELATÓRIO */
 .relatorio-conteudo {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-/* CARDS DE MÉTRICAS PRINCIPAIS */
 .resumo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -303,7 +299,6 @@
   background: linear-gradient(90deg, #51cf66, #2b8a3e);
 }
 
-/* SEÇÃO DE DESTAQUES (SEMANAS, MESES, TURNOS) */
 .secao-titulo {
   font-size: 1.25rem;
   font-weight: 600;
@@ -371,7 +366,6 @@
   font-style: italic;
 }
 
-/* SEÇÃO DE CATEGORIAS */
 .categorias-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -467,7 +461,6 @@
   text-align: center;
 }
 
-/* BOTÕES GERAIS */
 .botao {
   display: inline-block;
   padding: 0.5rem 1rem;

@@ -1,5 +1,4 @@
 <div class="pagina-planner">
-  <!-- CABEÇALHO E NAVEGAÇÃO DE DATA -->
   <header class="topo">
     <div class="topo__info">
       <h1>Tarefas de Hoje</h1>
@@ -26,7 +25,6 @@
     </div>
   </header>
 
-  <!-- MODAL / FORMULÁRIO DE TAREFA -->
   @if (exibindoModalTarefa()) {
     <div class="modal-overlay">
       <div class="modal-card">
@@ -57,7 +55,6 @@
             </label>
           </div>
 
-          <!-- SELETOR DE MODO: HORÁRIO VS TURNO -->
           <div class="campo">
             <span>Tipo de Agendamento</span>
             <div class="seletor-tipo">
@@ -123,9 +120,7 @@
     </div>
   }
 
-  <!-- CORPO PRINCIPAL -->
   <div class="planner-layout">
-    <!-- COLUNA ESQUERDA: AGENDA DE TAREFAS -->
     <section class="agenda">
       <div class="agenda-cabecalho">
         <h2>Agenda</h2>
@@ -136,7 +131,6 @@
         </div>
       </div>
 
-      <!-- TAREFAS POR TURNO (QUANDO A VISUALIZAÇÃO ESTÁ EM HORAS) -->
       @if (tarefasPorTurno().length > 0) {
         <div class="bloco-turnos-gerais">
           <span class="bloco-turnos-gerais__titulo">Tarefas por Turno do Dia:</span>
@@ -192,14 +186,11 @@
       </div>
     </section>
 
-    <!-- COLUNA DIREITA: LEMBRETES -->
     <section class="painel-lembretes">
       <h2>Lembretes da Semana</h2>
-
-      <!-- FORMULÁRIO RÁPIDO DE LEMBRETE -->
       <form class="form-lembrete-rapido" [formGroup]="formLembrete" (ngSubmit)="adicionarLembrete()">
         <input type="text" formControlName="descricao" placeholder="Novo lembrete..." />
-        
+
         <select formControlName="tipo">
           @for (tipo of tiposLembreteOpcoes; track tipo) {
             <option [value]="tipo">{{ tipo | titlecase }}</option>
@@ -216,7 +207,6 @@
         <button type="submit" class="botao-add-lembrete" title="Adicionar">+</button>
       </form>
 
-      <!-- GRADE DE POST-ITS -->
       <div class="grade-postits">
         @for (lembrete of lembretes(); track lembrete.id) {
           <div class="post-it" [style.background]="corDoTipoLembrete(lembrete.tipo)">
