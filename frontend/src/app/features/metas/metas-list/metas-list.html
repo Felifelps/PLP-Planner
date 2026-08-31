@@ -1,6 +1,16 @@
 <div class="pagina">
   <header class="topo">
-    <h1>Metas</h1>
+    <div class="topo__info">
+      <h1>Metas</h1>
+    </div>
+
+    <nav class="navegacao-secoes">
+      <a routerLink="/home" class="link-nav">Início</a>
+      <a routerLink="/tarefas" class="link-nav">Tarefas</a>
+      <a routerLink="/metas" class="link-nav link-nav--ativo">Metas</a>
+      <a routerLink="/relatorios" class="link-nav">Relatórios</a>
+    </nav>
+
     <a class="botao botao--primario" routerLink="/metas/nova">Nova meta</a>
   </header>
 

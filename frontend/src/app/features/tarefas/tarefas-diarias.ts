@@ -1,9 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
 import { TitleCasePipe, UpperCasePipe } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TarefaService } from '../../core/services/tarefa.service';
-import { LembreteService } from '../../core/services/lembrete.service';
-import { CategoriaService } from '../../core/services/categoria.service';
+import { RouterLink } from '@angular/router';
+import { Categoria } from '../../core/models/categoria.model';
+import { Lembrete, LembretePayload, TipoLembrete } from '../../core/models/lembrete.model';
 import {
   DuracaoTarefa,
   PrioridadeTarefa,
@@ -12,8 +12,9 @@ import {
   TarefaPayload,
   TurnoTarefa,
 } from '../../core/models/tarefa.model';
-import { Lembrete, LembretePayload, TipoLembrete } from '../../core/models/lembrete.model';
-import { Categoria } from '../../core/models/categoria.model';
+import { CategoriaService } from '../../core/services/categoria.service';
+import { LembreteService } from '../../core/services/lembrete.service';
+import { TarefaService } from '../../core/services/tarefa.service';
 
 export type TipoGranularidade = '30min' | '1h' | 'turno';
 
@@ -55,7 +56,7 @@ const CORES_TIPO_LEMBRETE: Record<TipoLembrete, string> = {
 @Component({
   selector: 'app-tarefas-diarias',
   standalone: true,
-  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe],
+  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, RouterLink],
   templateUrl: './tarefas-diarias.html',
   styleUrl: './tarefas-diarias.css',
 })
