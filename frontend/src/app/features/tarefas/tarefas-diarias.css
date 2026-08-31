@@ -30,6 +30,35 @@
   text-transform: capitalize;
 }
 
+.navegacao-secoes {
+  display: flex;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.3rem;
+}
+
+.link-nav {
+  text-decoration: none;
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.link-nav:hover {
+  color: #212529;
+  background: #f8f9fa;
+}
+
+.link-nav--ativo {
+  background: #4c6ef5;
+  color: #ffffff !important;
+}
+
 .topo__acoes {
   display: flex;
   align-items: center;

@@ -8,12 +8,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .topo h1 {
   margin: 0;
   font-size: 1.75rem;
+}
+
+.navegacao-secoes {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.3rem;
+}
+
+.link-nav {
+  text-decoration: none;
+  color: var(--cor-texto-suave);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.link-nav:hover {
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+.link-nav--ativo {
+  background: var(--cor-primaria);
+  color: #ffffff !important;
 }
 
 .botao {

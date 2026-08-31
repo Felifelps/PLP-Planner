@@ -6,6 +6,13 @@
       <span class="topo__data-extenso">{{ dataFormatada() }}</span>
     </div>
 
+    <nav class="navegacao-secoes">
+      <a routerLink="/home" class="link-nav">Início</a>
+      <a routerLink="/tarefas" class="link-nav link-nav--ativo">Tarefas</a>
+      <a routerLink="/metas" class="link-nav">Metas</a>
+      <a routerLink="/relatorios" class="link-nav">Relatórios</a>
+    </nav>
+
     <div class="topo__acoes">
       <div class="navegacao-data">
         <button type="button" class="botao-icone" (click)="navegarDia(-1)" aria-label="Dia anterior">‹</button>
