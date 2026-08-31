@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Categoria } from '../../core/models/categoria.model';
+import { Lembrete } from '../../core/models/lembrete.model';
 import { CategoriaContagem, Relatorio } from '../../core/models/relatorio.model';
 import { CategoriaService } from '../../core/services/categoria.service';
 import { LembreteService } from '../../core/services/lembrete.service';
@@ -46,6 +47,7 @@ export class RelatoriosComponent implements OnInit {
   readonly resumoMetasEmAndamento = signal(0);
   readonly resumoLembretesHoje = signal(0);
   readonly resumoProdutividade = signal(0);
+  readonly proximosLembretes = signal<Lembrete[]>([]);
 
   ngOnInit(): void {
     this.carregarCategorias();
@@ -70,11 +72,22 @@ export class RelatoriosComponent implements OnInit {
       error: (err) => console.error('Erro ao buscar tarefas do dia:', err),
     });
 
-    this.lembreteService.buscarTodos(hoje, hoje).subscribe({
-      next: (lembretes) => this.resumoLembretesHoje.set(lembretes?.length ?? 0),
+    const limite = new Date();
+    limite.setDate(limite.getDate() + 14);
+
+    this.lembreteService.buscarTodos(hoje, formatarDataLocal(limite)).subscribe({
+      next: (lembretes) => {
+        const ordenados = [...(lembretes ?? [])].sort((a, b) =>
+          a.data === b.data ? a.horario.localeCompare(b.horario) : a.data.localeCompare(b.data)
+        );
+
+        this.resumoLembretesHoje.set(ordenados.filter((l) => l.data === hoje).length);
+        this.proximosLembretes.set(ordenados.slice(0, 5));
+      },
       error: (err) => {
-        console.error('Erro ao buscar lembretes do dia:', err);
+        console.error('Erro ao buscar lembretes:', err);
         this.resumoLembretesHoje.set(0);
+        this.proximosLembretes.set([]);
       },
     });
 
@@ -206,6 +219,24 @@ export class RelatoriosComponent implements OnInit {
       default:
         return '⏱️';
     }
+  }
+
+  rotuloDataLembrete(iso: string): string {
+    const hoje = formatarDataLocal(new Date());
+    const amanha = new Date();
+    amanha.setDate(amanha.getDate() + 1);
+
+    if (iso === hoje) return 'Hoje';
+    if (iso === formatarDataLocal(amanha)) return 'Amanhã';
+
+    const [ano, mes, dia] = iso.split('-').map(Number);
+    return new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+    })
+      .format(new Date(ano, mes - 1, dia))
+      .replaceAll('.', '');
   }
 
   calcularPorcentagemCategoria(item: CategoriaContagem, lista: CategoriaContagem[]): number {

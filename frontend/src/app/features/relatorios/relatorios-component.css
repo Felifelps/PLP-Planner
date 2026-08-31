@@ -99,6 +99,70 @@ a.resumo-dia__card:hover {
   transition: width 0.3s ease;
 }
 
+/* PRÓXIMOS LEMBRETES */
+.proximos-lembretes {
+  margin-bottom: 2rem;
+}
+
+.proximos-lembretes__titulo {
+  font-size: 1.05rem;
+  color: var(--cor-texto);
+  margin: 0 0 0.75rem;
+}
+
+.proximos-lembretes__vazio {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+}
+
+.proximos-lembretes__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lembrete-linha {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.lembrete-linha__quando {
+  font-weight: 700;
+  color: var(--cor-primaria);
+  white-space: nowrap;
+  text-transform: capitalize;
+  font-variant-numeric: tabular-nums;
+}
+
+.lembrete-linha__desc {
+  flex: 1;
+  color: var(--cor-texto);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lembrete-linha__tipo {
+  color: var(--cor-texto-suave);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.lembrete-linha__recorrente {
+  color: var(--cor-primaria);
+}
+
 /* FILTROS */
 .filtros {
   display: flex;
