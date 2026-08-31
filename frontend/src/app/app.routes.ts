@@ -2,9 +2,11 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { 
-    path: 'home', 
-    loadComponent: () => import('./features/home/home-component').then(m => m.HomeComponent) 
+  {
+    path: 'home',
+    title: 'Início - PLP Planner',
+    loadComponent: () =>
+      import('./features/relatorios/relatorios-component').then((m) => m.RelatoriosComponent),
   },
   {
    path: 'tarefas',
@@ -23,10 +25,6 @@ export const routes: Routes = [
     path: 'metas/:id/editar',
     loadComponent: () => import('./features/metas/meta-form/meta-form').then((m) => m.MetaForm),
   },
-  {
-    path: 'relatorios',
-    title: 'Relatórios de Produtividade - PLP Planner',
-    loadComponent: () =>
-      import('./features/relatorios/relatorios-component').then((m) => m.RelatoriosComponent),
-  },
+  { path: 'relatorios', redirectTo: 'home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home' },
 ];
