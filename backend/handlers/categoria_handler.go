@@ -146,6 +146,12 @@ func (h *CategoriaHandler) Criar(
 	)
 
 	if err != nil {
+		if errors.Is(err, repositories.ErrCategoriaNomeDuplicado) {
+			http.Error(w, err.Error(), http.StatusConflict)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao criar categoria: %v",
 			err,
@@ -225,6 +231,12 @@ func (h *CategoriaHandler) Atualizar(
 			return
 		}
 
+		if errors.Is(err, repositories.ErrCategoriaNomeDuplicado) {
+			http.Error(w, err.Error(), http.StatusConflict)
+
+			return
+		}
+
 		log.Printf(
 			"erro ao atualizar categoria: %v",
 			err,
@@ -281,6 +293,16 @@ func (h *CategoriaHandler) Excluir(
 				w,
 				"categoria não encontrada",
 				http.StatusNotFound,
+			)
+
+			return
+		}
+
+		if errors.Is(err, repositories.ErrCategoriaEmUso) {
+			http.Error(
+				w,
+				err.Error(),
+				http.StatusConflict,
 			)
 
 			return
