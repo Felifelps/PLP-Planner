@@ -1,0 +1,261 @@
+<div class="pagina-relatorios">
+  <!-- CABEÇALHO DA PÁGINA -->
+  <header class="topo">
+    <div class="topo__info">
+      <h1>Relatórios de Produtividade</h1>
+      <p class="topo__subtitulo">Análise do seu desempenho em metas e tarefas executadas</p>
+    </div>
+
+    <!-- NAVEGAÇÃO ENTRE TELAS -->
+    <nav class="navegacao-secoes">
+      <a routerLink="/home" class="link-nav">Início</a>
+      <a routerLink="/tarefas" class="link-nav">Tarefas</a>
+      <a routerLink="/metas" class="link-nav">Metas</a>
+      <a routerLink="/relatorios" class="link-nav link-nav--ativo">Relatórios</a>
+    </nav>
+  </header>
+
+  <!-- BARRA DE FILTROS E CONTROLE DE PERÍODO -->
+  <section class="filtros">
+    <div class="filtros__tipos">
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'semana'"
+        (click)="selecionarPeriodo('semana')"
+      >
+        Semanal
+      </button>
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'mes'"
+        (click)="selecionarPeriodo('mes')"
+      >
+        Mensal
+      </button>
+      <button
+        type="button"
+        class="botao-periodo"
+        [class.botao-periodo--ativo]="tipoPeriodo() === 'ano'"
+        (click)="selecionarPeriodo('ano')"
+      >
+        Anual
+      </button>
+    </div>
+
+    <div class="filtros__navegacao">
+      <button type="button" class="botao-icone" (click)="navegar(-1)" aria-label="Período anterior">‹</button>
+      <button type="button" class="botao-hoje" (click)="irParaHoje()">Atual</button>
+      <button type="button" class="botao-icone" (click)="navegar(1)" aria-label="Próximo período">›</button>
+      <span class="filtros__rotulo">{{ rotuloIntervalo() }}</span>
+    </div>
+  </section>
+
+  <!-- ESTADO DE ERRO -->
+  @if (erro()) {
+    <div class="alerta-erro">
+      <span class="alerta-erro__icone">⚠️</span>
+      <div>
+        <p class="alerta-erro__texto">{{ erro() }}</p>
+        <button type="button" class="botao botao--secundario" (click)="carregarRelatorio()">Tentar novamente</button>
+      </div>
+    </div>
+  }
+
+  <!-- ESTADO DE CARREGANDO -->
+  @if (carregando()) {
+    <div class="carregando-container">
+      <div class="spinner"></div>
+      <p>Gerando relatório consolidado...</p>
+    </div>
+  } @else if (relatorio()) {
+    <div class="relatorio-conteudo">
+      <!-- CARDS PRINCIPAIS: METAS E TAREFAS -->
+      <section class="resumo-grid">
+        <!-- CARD METAS CUMPRIDAS -->
+        <article class="card-metrica card-metrica--metas">
+          <div class="card-metrica__cabecalho">
+            <span class="card-metrica__icone">🎯</span>
+            <span class="card-metrica__tag">Metas</span>
+          </div>
+          <h2 class="card-metrica__titulo">Metas Cumpridas</h2>
+          <div class="card-metrica__valores">
+            <span class="card-metrica__destaque">{{ relatorio()!.percentual_metas_cumpridas | number: '1.0-1' }}%</span>
+            <span class="card-metrica__contagem">
+              <strong>{{ metasCumpridasTotal() }}</strong> de {{ relatorio()!.total_metas }} metas cumpridas
+            </span>
+          </div>
+          <div class="barra-progresso">
+            <div
+              class="barra-progresso__preenchimento barra-progresso__preenchimento--metas"
+              [style.width.%]="relatorio()!.percentual_metas_cumpridas"
+            ></div>
+          </div>
+        </article>
+
+        <!-- CARD TAREFAS EXECUTADAS -->
+        <article class="card-metrica card-metrica--tarefas">
+          <div class="card-metrica__cabecalho">
+            <span class="card-metrica__icone">✅</span>
+            <span class="card-metrica__tag">Tarefas</span>
+          </div>
+          <h2 class="card-metrica__titulo">Tarefas Executadas</h2>
+          <div class="card-metrica__valores">
+            <span class="card-metrica__destaque">{{ relatorio()!.percentual_tarefas_executadas | number: '1.0-1' }}%</span>
+            <span class="card-metrica__contagem">
+              <strong>{{ tarefasExecutadasTotal() }}</strong> de {{ relatorio()!.total_tarefas }} tarefas executadas
+            </span>
+          </div>
+          <div class="barra-progresso">
+            <div
+              class="barra-progresso__preenchimento barra-progresso__preenchimento--tarefas"
+              [style.width.%]="relatorio()!.percentual_tarefas_executadas"
+            ></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- DESTAQUES DE PRODUTIVIDADE: SEMANAS, MESES E TURNOS -->
+      <section class="secao-destaques">
+        <h2 class="secao-titulo">🏆 Destaques de Produtividade</h2>
+        <div class="destaques-grid">
+          <!-- SEMANA MAIS PRODUTIVA -->
+          <div class="card-destaque">
+            <div class="card-destaque__header">
+              <span class="card-destaque__icone">📅</span>
+              <span class="card-destaque__tipo">Semana mais produtiva</span>
+            </div>
+            @if (relatorio()!.semana_mais_produtiva) {
+              <h3 class="card-destaque__nome">{{ formatarRotuloSemana(relatorio()!.semana_mais_produtiva?.rotulo) }}</h3>
+              <p class="card-destaque__detalhe">
+                <strong>{{ relatorio()!.semana_mais_produtiva?.total }}</strong> tarefas concluídas com êxito
+              </p>
+            } @else {
+              <p class="card-destaque__vazio">Sem dados de tarefas executadas neste período</p>
+            }
+          </div>
+
+          <!-- MÊS MAIS PRODUTIVO -->
+          <div class="card-destaque">
+            <div class="card-destaque__header">
+              <span class="card-destaque__icone">📆</span>
+              <span class="card-destaque__tipo">Mês mais produtivo</span>
+            </div>
+            @if (relatorio()!.mes_mais_produtivo) {
+              <h3 class="card-destaque__nome">{{ formatarRotuloMes(relatorio()!.mes_mais_produtivo?.rotulo) }}</h3>
+              <p class="card-destaque__detalhe">
+                <strong>{{ relatorio()!.mes_mais_produtivo?.total }}</strong> tarefas concluídas com êxito
+              </p>
+            } @else {
+              <p class="card-destaque__vazio">Sem dados de tarefas executadas neste período</p>
+            }
+          </div>
+
+          <!-- TURNO MAIS PRODUTIVO -->
+          <div class="card-destaque">
+            <div class="card-destaque__header">
+              <span class="card-destaque__icone">{{ iconeTurno(relatorio()!.turno_mais_produtivo?.turno) }}</span>
+              <span class="card-destaque__tipo">Turno mais produtivo</span>
+            </div>
+            @if (relatorio()!.turno_mais_produtivo) {
+              <h3 class="card-destaque__nome">{{ relatorio()!.turno_mais_produtivo?.turno | titlecase }}</h3>
+              <p class="card-destaque__detalhe">
+                <strong>{{ relatorio()!.turno_mais_produtivo?.total }}</strong> tarefas concluídas neste horário
+              </p>
+            } @else {
+              <p class="card-destaque__vazio">Sem dados de turnos no período</p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIAS MAIS REALIZADAS: TAREFAS E METAS -->
+      <section class="secao-categorias">
+        <div class="categorias-grid">
+          <!-- CATEGORIAS DE TAREFAS -->
+          <div class="card-categoria-ranking">
+            <div class="card-categoria-ranking__topo">
+              <h2>📋 Categorias de Tarefas Mais Realizadas</h2>
+            </div>
+
+            @if (relatorio()!.categorias_mais_realizadas_tarefas.length > 0) {
+              <div class="lista-ranking">
+                @for (item of relatorio()!.categorias_mais_realizadas_tarefas; track item.categoria_id; let idx = $index) {
+                  <div class="item-ranking">
+                    <div class="item-ranking__info">
+                      <span class="item-ranking__posicao">#{{ idx + 1 }}</span>
+                      <span
+                        class="item-ranking__chip"
+                        [style.background]="corDaCategoria(item.categoria_id)"
+                      >
+                        {{ nomeDaCategoria(item.categoria_id) }}
+                      </span>
+                      <span class="item-ranking__total">
+                        <strong>{{ item.total }}</strong> {{ item.total === 1 ? 'tarefa' : 'tarefas' }}
+                      </span>
+                      <span class="item-ranking__porcentagem">
+                        ({{ calcularPorcentagemCategoria(item, relatorio()!.categorias_mais_realizadas_tarefas) }}%)
+                      </span>
+                    </div>
+
+                    <div class="item-ranking__barra-fundo">
+                      <div
+                        class="item-ranking__barra-progresso"
+                        [style.background]="corDaCategoria(item.categoria_id)"
+                        [style.width.%]="calcularPorcentagemCategoria(item, relatorio()!.categorias_mais_realizadas_tarefas)"
+                      ></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mensagem-vazia">Nenhuma tarefa executada registrada para categorização.</p>
+            }
+          </div>
+
+          <!-- CATEGORIAS DE METAS -->
+          <div class="card-categoria-ranking">
+            <div class="card-categoria-ranking__topo">
+              <h2>🎯 Categorias de Metas Mais Realizadas</h2>
+            </div>
+
+            @if (relatorio()!.categorias_mais_realizadas_metas.length > 0) {
+              <div class="lista-ranking">
+                @for (item of relatorio()!.categorias_mais_realizadas_metas; track item.categoria_id; let idx = $index) {
+                  <div class="item-ranking">
+                    <div class="item-ranking__info">
+                      <span class="item-ranking__posicao">#{{ idx + 1 }}</span>
+                      <span
+                        class="item-ranking__chip"
+                        [style.background]="corDaCategoria(item.categoria_id)"
+                      >
+                        {{ nomeDaCategoria(item.categoria_id) }}
+                      </span>
+                      <span class="item-ranking__total">
+                        <strong>{{ item.total }}</strong> {{ item.total === 1 ? 'meta' : 'metas' }}
+                      </span>
+                      <span class="item-ranking__porcentagem">
+                        ({{ calcularPorcentagemCategoria(item, relatorio()!.categorias_mais_realizadas_metas) }}%)
+                      </span>
+                    </div>
+
+                    <div class="item-ranking__barra-fundo">
+                      <div
+                        class="item-ranking__barra-progresso"
+                        [style.background]="corDaCategoria(item.categoria_id)"
+                        [style.width.%]="calcularPorcentagemCategoria(item, relatorio()!.categorias_mais_realizadas_metas)"
+                      ></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mensagem-vazia">Nenhuma meta cumprida registrada para categorização.</p>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+</div>
