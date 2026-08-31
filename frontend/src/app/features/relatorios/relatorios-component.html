@@ -1,17 +1,42 @@
 <div class="pagina-relatorios">
   <header class="topo">
     <div class="topo__info">
-      <h1>Relatórios de Produtividade</h1>
-      <p class="topo__subtitulo">Análise do seu desempenho em metas e tarefas executadas</p>
+      <h1>Olá! Aqui está o seu resumo.</h1>
+      <p class="topo__subtitulo">Acompanhe sua produtividade e vá direto para o que importa</p>
+    </div>
+  </header>
+
+  <section class="resumo-dia">
+    <a class="resumo-dia__card" routerLink="/tarefas">
+      <span class="resumo-dia__rotulo">Tarefas de hoje</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoTarefasPendentes() }}</strong> pendentes
+      </span>
+      <span class="resumo-dia__detalhe">{{ resumoTarefasConcluidas() }} concluídas</span>
+    </a>
+
+    <a class="resumo-dia__card" routerLink="/metas">
+      <span class="resumo-dia__rotulo">Metas</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoMetasEmAndamento() }}</strong> em andamento
+      </span>
+    </a>
+
+    <div class="resumo-dia__card">
+      <span class="resumo-dia__rotulo">Lembretes</span>
+      <span class="resumo-dia__valor">
+        <strong>{{ resumoLembretesHoje() }}</strong> para hoje
+      </span>
     </div>
 
-    <nav class="navegacao-secoes">
-      <a routerLink="/home" class="link-nav">Início</a>
-      <a routerLink="/tarefas" class="link-nav">Tarefas</a>
-      <a routerLink="/metas" class="link-nav">Metas</a>
-      <a routerLink="/relatorios" class="link-nav link-nav--ativo">Relatórios</a>
-    </nav>
-  </header>
+    <div class="resumo-dia__card resumo-dia__card--destaque">
+      <span class="resumo-dia__rotulo">Produtividade diária</span>
+      <span class="resumo-dia__valor"><strong>{{ resumoProdutividade() }}%</strong></span>
+      <div class="resumo-dia__barra">
+        <div class="resumo-dia__barra-preenchimento" [style.width.%]="resumoProdutividade()"></div>
+      </div>
+    </div>
+  </section>
 
   <section class="filtros">
     <div class="filtros__tipos">
