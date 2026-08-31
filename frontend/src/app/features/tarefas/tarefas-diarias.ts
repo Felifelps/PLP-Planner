@@ -224,7 +224,7 @@ export class TarefasDiarias {
 
     if (modo === '30min') {
       const blocos: BlocoTempo[] = [];
-      for (let h = 8; h <= 18; h++) {
+      for (let h = 8; h <= 23; h++) {
         const hPad = h.toString().padStart(2, '0');
         const hProx = (h + 1).toString().padStart(2, '0');
         blocos.push({ rotulo: `${hPad}:00`, inicio: `${hPad}:00`, fim: `${hPad}:30` });
@@ -234,7 +234,7 @@ export class TarefasDiarias {
     }
 
     if (modo === '1h') {
-      return Array.from({ length: 11 }, (_, i) => {
+      return Array.from({ length: 16 }, (_, i) => {
         const h = i + 8;
         const hPad = h.toString().padStart(2, '0');
         const hProx = (h + 1).toString().padStart(2, '0');
