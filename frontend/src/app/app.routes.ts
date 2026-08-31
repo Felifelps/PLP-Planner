@@ -25,6 +25,12 @@ export const routes: Routes = [
     path: 'metas/:id/editar',
     loadComponent: () => import('./features/metas/meta-form/meta-form').then((m) => m.MetaForm),
   },
+  {
+    path: 'categorias',
+    title: 'Categorias - PLP Planner',
+    loadComponent: () =>
+      import('./features/categorias/categorias-page').then((m) => m.CategoriasPage),
+  },
   { path: 'relatorios', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];

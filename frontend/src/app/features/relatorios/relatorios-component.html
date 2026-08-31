@@ -38,6 +38,30 @@
     </div>
   </section>
 
+  <section class="proximos-lembretes">
+    <h2 class="proximos-lembretes__titulo">Próximos lembretes</h2>
+    @if (proximosLembretes().length === 0) {
+      <p class="proximos-lembretes__vazio">Nenhum lembrete nos próximos dias.</p>
+    } @else {
+      <ul class="proximos-lembretes__lista">
+        @for (lembrete of proximosLembretes(); track $index) {
+          <li class="lembrete-linha">
+            <span class="lembrete-linha__quando">
+              {{ rotuloDataLembrete(lembrete.data) }} · {{ lembrete.horario }}
+            </span>
+            <span class="lembrete-linha__desc">{{ lembrete.descricao }}</span>
+            <span class="lembrete-linha__tipo">
+              {{ lembrete.tipo | titlecase }}
+              @if (lembrete.recorrente) {
+                <span class="lembrete-linha__recorrente">· semanal</span>
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
   <section class="filtros">
     <div class="filtros__tipos">
       <button
