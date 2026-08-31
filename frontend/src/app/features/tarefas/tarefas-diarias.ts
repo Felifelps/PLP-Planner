@@ -1,7 +1,6 @@
 import { TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { Categoria } from '../../core/models/categoria.model';
 import { Lembrete, LembretePayload, TipoLembrete } from '../../core/models/lembrete.model';
 import {
@@ -56,7 +55,7 @@ const CORES_TIPO_LEMBRETE: Record<TipoLembrete, string> = {
 @Component({
   selector: 'app-tarefas-diarias',
   standalone: true,
-  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe, RouterLink],
+  imports: [ReactiveFormsModule, TitleCasePipe, UpperCasePipe],
   templateUrl: './tarefas-diarias.html',
   styleUrl: './tarefas-diarias.css',
 })
