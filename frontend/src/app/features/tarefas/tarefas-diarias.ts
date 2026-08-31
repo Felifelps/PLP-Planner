@@ -451,15 +451,22 @@ export class TarefasDiarias {
     if (this.formTarefa.invalid) return;
     const v = this.formTarefa.getRawValue();
 
+    const ehHorario = this.tipoAgendamento() === 'horario';
+
     const payload: TarefaPayload = {
-      descricao: v.descricao,
+      descricao: v.descricao.trim(),
       categoria_id: Number(v.categoriaId),
       data: paraDataApi(v.data),
       status: v.status,
       prioridade: v.prioridade,
-      ...(this.tipoAgendamento() === 'horario'
-        ? { horario_inicio: v.horarioInicio, duracao: v.duracao }
-        : { turno: v.turno }),
+      ...(ehHorario
+        ? {
+            horario_inicio: v.horarioInicio,
+            duracao: v.duracao,
+          }
+        : {
+            turno: v.turno,
+          }),
     };
 
     const emEdicao = this.tarefaEmEdicao();
