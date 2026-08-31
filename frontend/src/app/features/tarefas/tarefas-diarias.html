@@ -1,22 +1,55 @@
 <div class="pagina-planner">
   <header class="topo">
     <div class="topo__info">
-      <h1>Tarefas de Hoje</h1>
+      <h1>{{ ehHoje() ? 'Tarefas de Hoje' : 'Tarefas' }}</h1>
       <span class="topo__data-extenso">{{ dataFormatada() }}</span>
     </div>
 
     <div class="topo__acoes">
-      <div class="navegacao-data">
-        <button type="button" class="botao-icone" (click)="navegarDia(-1)" aria-label="Dia anterior">‹</button>
-        <button type="button" class="botao-hoje" (click)="irParaHoje()">Hoje</button>
-        <button type="button" class="botao-icone" (click)="navegarDia(1)" aria-label="Próximo dia">›</button>
-      </div>
-
-      <button type="button" class="botao botao--primario" (click)="exibindoModalTarefa.set(true)">
-        + Nova Tarefa
-      </button>
+      @if (abaAtiva() === 'agenda') {
+        <button type="button" class="botao botao--primario" (click)="exibindoModalTarefa.set(true)">
+          + Nova Tarefa
+        </button>
+      }
     </div>
   </header>
+
+  <nav class="abas" role="tablist">
+    <button
+      type="button"
+      class="aba"
+      [class.aba--ativa]="abaAtiva() === 'agenda'"
+      (click)="abaAtiva.set('agenda')"
+    >
+      Agenda
+    </button>
+    <button
+      type="button"
+      class="aba"
+      [class.aba--ativa]="abaAtiva() === 'lembretes'"
+      (click)="abaAtiva.set('lembretes')"
+    >
+      Lembretes
+      @if (lembretes().length > 0) {
+        <span class="aba__contador">{{ lembretes().length }}</span>
+      }
+    </button>
+  </nav>
+
+  <div class="barra-data">
+    <button type="button" class="barra-data__seta" (click)="navegar(-1)" aria-label="Anterior">‹</button>
+    <div class="barra-data__atual">
+      @if (abaAtiva() === 'lembretes') {
+        <strong>Semana de {{ rotuloSemana() }}</strong>
+      } @else {
+        <strong>{{ rotuloDiaSelecionado() }}</strong>
+      }
+    </div>
+    <button type="button" class="barra-data__seta" (click)="navegar(1)" aria-label="Próximo">›</button>
+    @if (!ehHoje()) {
+      <button type="button" class="barra-data__hoje" (click)="irParaHoje()">Ir para hoje</button>
+    }
+  </div>
 
   @if (exibindoModalTarefa()) {
     <div class="modal-overlay">
@@ -113,10 +146,10 @@
     </div>
   }
 
-  <div class="planner-layout">
+  @if (abaAtiva() === 'agenda') {
     <section class="agenda">
       <div class="agenda-cabecalho">
-        <h2>Agenda</h2>
+        <span class="agenda-cabecalho__titulo">Visualização</span>
         <div class="botoes-visualizacao">
           <button type="button" class="btn-opcao" [class.btn-opcao--ativo]="granularidade() === '30min'" (click)="granularidade.set('30min')">30 min</button>
           <button type="button" class="btn-opcao" [class.btn-opcao--ativo]="granularidade() === '1h'" (click)="granularidade.set('1h')">1 hora</button>
@@ -178,49 +211,78 @@
         }
       </div>
     </section>
-
-    <section class="painel-lembretes">
-      <h2>Lembretes da Semana</h2>
-      <form class="form-lembrete-rapido" [formGroup]="formLembrete" (ngSubmit)="adicionarLembrete()">
-        <input type="text" formControlName="descricao" placeholder="Novo lembrete..." />
-
-        <select formControlName="tipo">
-          @for (tipo of tiposLembreteOpcoes; track tipo) {
-            <option [value]="tipo">{{ tipo | titlecase }}</option>
-          }
-        </select>
-
-        <input type="time" formControlName="horario" class="input-horario" />
-
-        <label class="check-recorrente" title="Repetir semanalmente">
-          <input type="checkbox" formControlName="recorrente" />
-          <span>🔁</span>
+  } @else {
+    <section class="lembretes">
+      <form class="form-lembrete" [formGroup]="formLembrete" (ngSubmit)="adicionarLembrete()">
+        <label class="campo campo--cresce">
+          <span>Lembrete</span>
+          <input type="text" formControlName="descricao" placeholder="Ex: Ligar para o orientador" />
         </label>
 
-        <button type="submit" class="botao-add-lembrete" title="Adicionar">+</button>
+        <div class="form-lembrete__linha">
+          <label class="campo">
+            <span>Tipo</span>
+            <select formControlName="tipo">
+              @for (tipo of tiposLembreteOpcoes; track tipo) {
+                <option [value]="tipo">{{ tipo | titlecase }}</option>
+              }
+            </select>
+          </label>
+          <label class="campo">
+            <span>Data</span>
+            <input type="date" formControlName="data" />
+          </label>
+          <label class="campo">
+            <span>Horário</span>
+            <input type="time" formControlName="horario" />
+          </label>
+          <label class="campo campo--check">
+            <input type="checkbox" formControlName="recorrente" />
+            <span>Repetir toda semana</span>
+          </label>
+          <button type="submit" class="botao botao--primario" [disabled]="formLembrete.invalid">
+            Adicionar lembrete
+          </button>
+        </div>
       </form>
 
-      <div class="grade-postits">
-        @for (lembrete of lembretes(); track lembrete.id) {
-          <div class="post-it" [style.background]="corDoTipoLembrete(lembrete.tipo)">
-            <div class="post-it__header">
-              <span class="post-it__tipo">{{ lembrete.tipo | uppercase }}</span>
-              <button type="button" class="post-it__btn-excluir" (click)="excluirLembrete(lembrete.id)">×</button>
-            </div>
-
-            <p class="post-it__texto">{{ lembrete.descricao }}</p>
-
-            <div class="post-it__rodape">
-              <span class="post-it__horario">⏰ {{ lembrete.horario }}</span>
-              @if (lembrete.recorrente) {
-                <span class="post-it__recorrente" title="Recorrente semanal">🔁 semanal</span>
+      <div class="semana-lembretes">
+        @for (dia of lembretesPorDia(); track dia.iso) {
+          <div class="dia-lembrete" [class.dia-lembrete--hoje]="dia.ehHoje">
+            <div class="dia-lembrete__cabecalho">
+              <span class="dia-lembrete__rotulo">{{ dia.rotulo }}</span>
+              @if (dia.ehHoje) {
+                <span class="dia-lembrete__tag">hoje</span>
               }
             </div>
+
+            @for (lembrete of dia.itens; track lembrete.id) {
+              <div class="cartao-lembrete" [style.border-left-color]="corDoTipoLembrete(lembrete.tipo)">
+                <span class="cartao-lembrete__hora">{{ lembrete.horario }}</span>
+                <div class="cartao-lembrete__texto">
+                  <span class="cartao-lembrete__desc">{{ lembrete.descricao }}</span>
+                  <span class="cartao-lembrete__meta">
+                    {{ lembrete.tipo | titlecase }}
+                    @if (lembrete.recorrente) {
+                      <span class="cartao-lembrete__recorrente" title="Repete toda semana">· semanal</span>
+                    }
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  class="cartao-lembrete__excluir"
+                  (click)="excluirLembrete(lembrete)"
+                  aria-label="Excluir lembrete"
+                >
+                  ×
+                </button>
+              </div>
+            } @empty {
+              <p class="dia-lembrete__vazio">Nenhum lembrete</p>
+            }
           </div>
-        } @empty {
-          <p class="lembretes-vazio">Nenhum lembrete para esta data.</p>
         }
       </div>
     </section>
-  </div>
+  }
 </div>
